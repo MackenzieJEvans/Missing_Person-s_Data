@@ -8,8 +8,10 @@ Per follow-up direction, the scope is narrowed to:
 Past 7 days only (volume varies week to week; ~28 records were live on 2026-09-08 — treat as illustrative, not a fixed expectation)
 No missing date in the output
 Age as 10-year ranges, not exact values
-Reporting agency instead of derived county
-Sex and race are included (confirmed 2026-09-10). They come only from the per-person detail page, so the script must fetch /person/{id} for each past-week row.
+County, derived from the reporting agency (the agency string itself is not published). See "Deriving county" below.
+Race is included; it comes only from the per-person detail page, so the script must fetch /person/{id} for each past-week row.
+Sex: TBC — the goal text says include it, the 2026-09-10 publish instruction listed only age_range and race. Confirm before the CSV ships.
+Output CSV is published to the public GitHub repo MackenzieJEvans/Missing_Person-s_Data (decided 2026-09-10).
 
 ### How the source actually works (verified 2026-09-08)
 Search	Drupal form #missing-persons-search-form, POST to the same URL, requires a per-session form_build_id + form_id
@@ -46,32 +48,34 @@ For each row that survives the past-week filter, GET https://statepatrol.nebrask
 - Space the detail requests (~1 req/sec) and send a descriptive User-Agent.
 - The detail fragment contains the person's name. Do not write raw responses to disk, logs, or cache. data-id is held only in memory to build the URL and is never emitted.
 
+### Deriving county
+
+The source's own agency dropdown (reporting_agency_select on the search form, ~249 options) is organized by county: each option is either a sheriff entry "<County> CO SO <SeatTown>" or a municipal/other agency listed immediately under its county's sheriff. So a map is built by scanning the dropdown options in document order, tracking the last "<County> CO SO ..." seen, and assigning every following non-SO option to that county until the next SO entry.
+- Build this map at run time from the live form, and also write it to agency_county_map.csv (committed) so the derivation is auditable and diffable.
+- The trailing block of the dropdown — Nebraska State Patrol, "SP <city>", Carrier Enforcement, FBI, USAF/ANG, Dept of Vet Affairs — is not under any county cluster. These map to "Statewide / not county-specific".
+- A record whose agency string does not match any dropdown option maps to "Unknown"; log it so the map can be extended.
+- Match on a normalized agency string (collapse whitespace, case-fold); expect minor spelling drift between the list rows and the dropdown labels.
+
 ### Emit the CSV
 
 missing_persons_week_of_YYYY-MM-DD.csv
 
 Column	Values
 age_range	0-9, 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+ (bucketed from "Age Missing", not current age)
-sex	Value from the detail page, verbatim after whitespace/case normalization; "Unknown" if absent
 race	Value from the detail page, verbatim after whitespace/case normalization; "Unknown" if absent
-agency	Reporting agency string from the list, verbatim (watch for the same agency spelled two ways across rows)
+county	Derived from the reporting agency (see above); "Statewide / not county-specific" or "Unknown" where it can't be pinned
+sex	INCLUDE ONLY IF CONFIRMED — value from the detail page, normalized; "Unknown" if absent
 
-### Deliberately excluded: 
-name, data-id, missing date, current age, eyes, hair, height, weight, description, remarks, last seen, agency phone, photo.
+### Deliberately excluded from the output
+name, data-id, missing date, exact age, current age, reporting agency string, eyes, hair, height, weight, description, remarks, last seen, agency phone, photo.
 
-data-id in particular must not ship — it is the /person/{id} key, so publishing it would hand any reader the name back in one request.
+data-id in particular must not ship — it is the /person/{id} key, so publishing it would hand any reader the name back in one request. The agency string is dropped too: it is finer-grained than county and, combined with the 7-day window, points at the same small municipal caseloads.
 
-### Open privacy decision (blocks a public release of the CSV)
+### Privacy posture (decided 2026-09-10)
 
-The risk is re-identification by linkage, not just thin cells. The source site is live and still carries name + missing date + age + agency for the same 7-day window this CSV covers. A reader filters the live list to one agency and window and recovers the name; adding sex and race narrows that further. Dropping the name column does not defend against this. With ~28 records across 8 agencies (18 at Omaha PD), the non-Omaha agencies are near-singletons — small cells are the common case here, not the edge.
+Direction given: publish a row-level CSV to the public repo with age_range + race (+ county derived from agency; sex pending). The residual risk is re-identification by linkage — the source site is live and still carries name + missing date + exact age + agency for the same 7-day window. County (not agency) plus a 10-year age band plus race is the mitigation chosen; it is coarser than the source but a lone record in a rural county in a given week can still be thin. Remaining optional levers if that is a concern: a 1-week publication lag, small-cell suppression (drop/roll up county rows with < ~5 records), or switching to aggregate counts instead of row-level.
 
-Levers, to be decided before anything is published:
-- Publication lag — release a week only after the window has closed and records have churned off the source.
-- Aggregation — publish per-dimension counts rather than a row-level CSV.
-- Coarser geography — region/troop area instead of individual agency.
-- Small-cell suppression — drop or roll up cells below a threshold (~5).
-
-Also: confirm whether the GitHub repo is public before committing any CSV. If it is, the repo is itself the publication vector.
+Repo confirmed public on 2026-09-10 (GitHub API, "visibility": "public") — every committed CSV is world-readable and retained in git history even if later removed.
 
 ### Resources 
 
