@@ -1,0 +1,6 @@
+.cache_records.html
+.cache_records.json
+venv/
+__pycache__/
+*.pyc
+.DS_Store

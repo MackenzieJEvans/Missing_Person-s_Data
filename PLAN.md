@@ -62,9 +62,11 @@ missing_persons_week_of_YYYY-MM-DD.csv
 
 Column	Values
 age_range	0-9, 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+ (bucketed from "Age Missing", not current age)
-race	Value from the detail page, verbatim after whitespace/case normalization; "Unknown" if absent
+race	Value from the detail page, whitespace-normalized, verbatim otherwise; "Unknown" if absent
 county	Derived from the reporting agency (see above); "Statewide / not county-specific" or "Unknown" where it can't be pinned
-sex	INCLUDE ONLY IF CONFIRMED — value from the detail page, normalized; "Unknown" if absent
+sex	Value from the detail page ("M"/"F"/...), whitespace-normalized; "Unknown" if absent
+
+Final column set (decided 2026-09-10): age_range, race, county, sex. No small-cell suppression — --suppress-small-counties exists in scrape.py but is not used for the published file.
 
 ### Deliberately excluded from the output
 name, data-id, missing date, exact age, current age, reporting agency string, eyes, hair, height, weight, description, remarks, last seen, agency phone, photo.
@@ -73,7 +75,11 @@ data-id in particular must not ship — it is the /person/{id} key, so publishin
 
 ### Privacy posture (decided 2026-09-10)
 
-Direction given: publish a row-level CSV to the public repo with age_range + race (+ county derived from agency; sex pending). The residual risk is re-identification by linkage — the source site is live and still carries name + missing date + exact age + agency for the same 7-day window. County (not agency) plus a 10-year age band plus race is the mitigation chosen; it is coarser than the source but a lone record in a rural county in a given week can still be thin. Remaining optional levers if that is a concern: a 1-week publication lag, small-cell suppression (drop/roll up county rows with < ~5 records), or switching to aggregate counts instead of row-level.
+Decision: publish a row-level CSV to the public repo with age_range + race + county + sex, no suppression.
+
+The residual risk was raised explicitly and accepted: the source site is live and still carries name + missing date + exact age + agency for the same 7-day window, so a county with a single record that week (this run: Colfax, Buffalo, Sherman — 1 each) is re-identifiable by anyone who cross-references the published row against the live named list. The mitigations in place are the 10-year age band, county instead of the exact agency, and no missing-date column; small-cell suppression and a publication lag were considered and declined.
+
+Levers still available in scrape.py if the posture changes later: `--suppress-small-counties` (rolls counties with < 5 records that week into "Other (small county)"), dropping `--include-county`, or a publication lag.
 
 Repo confirmed public on 2026-09-10 (GitHub API, "visibility": "public") — every committed CSV is world-readable and retained in git history even if later removed.
 
