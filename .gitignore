@@ -1,5 +1,6 @@
 .cache_records.html
 .cache_records.json
+.cache_records_sd.json
 venv/
 __pycache__/
 *.pyc
