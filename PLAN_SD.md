@@ -20,9 +20,12 @@ Clearinghouse, an ASP.NET Core site run by the state).
 - **Time window**: past 7 days, matching Nebraska's convention exactly
   ("unresolved cases by report week"). ~7 records/week currently vs.
   Nebraska's ~28/week - expected, given SD's smaller population.
-- **Publish target**: not yet decided. Script currently writes only to the
-  local working directory; nothing is pushed to the public repo until that's
-  revisited.
+- **Publish target**: the same public repo as Nebraska,
+  `MackenzieJEvans/Missing_Person-s_Data` (confirmed 2026-09-11, after the
+  tribal-agency-naming revision above). Nebraska's privacy posture - row-level
+  CSV, no suppression, residual re-identification risk for single-record
+  counties/agencies accepted and documented - carries over unchanged; see
+  "Privacy posture" below.
 
 ## How the source differs from Nebraska (see scrape.py's PLAN.md for contrast)
 
@@ -101,20 +104,26 @@ current age.
 ### Deliberately excluded from the output
 
 Name, the person's internal record id, missing date, exact age, current age,
-raw agency string, eyes, hair, height, weight, remarks/last-seen text, agency
-phone, photo. Same rationale as Nebraska: county is coarser than the agency
-string, which for a single-record county/week would otherwise point straight
-back at the live named listing.
+eyes, hair, height, weight, remarks/last-seen text, agency phone, photo. Same
+rationale as Nebraska: county is coarser than the raw agency string, which for
+a single-record county/week would otherwise point straight back at the live
+named listing. The one deliberate exception is tribal police departments,
+where the `county` field *is* the agency name (see "Decisions" above) - a
+narrower exposure than Nebraska's model, accepted because there is no coarser
+label available that isn't misleading.
 
 ### Privacy posture
 
-Not yet decided for South Dakota specifically - see "Publish target" above.
-Nebraska's posture (row-level CSV, no suppression, residual re-identification
-risk for single-record counties accepted and documented) is the default this
-would inherit if SD data is added to the same public repo, but that hasn't
-been confirmed. `--suppress-small-counties` exists in scrape_sd.py (rolls
-counties with < 5 records that week into "Other (small county)") if the
-posture ends up different from Nebraska's.
+Confirmed 2026-09-11: publish a row-level CSV to the public repo, same as
+Nebraska - age_range, race, county, sex, no suppression. The residual risk is
+the same shape as Nebraska's: the source site is live and still carries name +
+missing date + exact age + agency for the same 7-day window, so any county (or
+named tribal agency) with a single record that week is re-identifiable by
+cross-referencing the published row against the live named list. This week's
+run has three such singletons (Bon Homme, Minnehaha, Cheyenne River Sioux
+Tribal PD). `--suppress-small-counties` remains available in scrape_sd.py
+(rolls county/agency values with < 5 records that week into "Other (small
+county)") if the posture is revisited.
 
 ## Resources
 
