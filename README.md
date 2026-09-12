@@ -14,6 +14,7 @@ disallowed by robots.txt). Race and sex come from the per-person detail pages.
 | --- | --- |
 | `scrape.py` | Fetches the list, keeps the past 7 days, derives county from the reporting agency, drops every identifying field, writes the weekly CSV. stdlib + `requests` + `beautifulsoup4`. |
 | `missing_persons_week_of_YYYY-MM-DD.csv` | One row per person still listed as missing whose missing date is within 7 days of the scrape. Columns: `age_range` (10-year band from age when missing), `race`, `county`, `sex`. |
+| `missing_persons_week_of_YYYY-MM-DD_counts.csv` | The same week's data rolled up: how many people fall in each value of each column (e.g. how many 10-19, how many from Douglas County, how many women). Long format — `field, value, count` — so a chart tool can filter by `field` rather than needing one column per dimension. |
 | `agency_county_map.csv` | The agency to county lookup, generated from the source's own reporting-agency dropdown (which is ordered county-by-county). Committed so the derivation is auditable. |
 | `PLAN.md` | Scope, method, and the privacy decisions behind what is and isn't published. |
 

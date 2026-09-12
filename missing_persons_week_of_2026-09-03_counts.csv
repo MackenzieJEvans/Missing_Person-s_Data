@@ -1,0 +1,16 @@
+field,value,count
+age_range,10-19,21
+age_range,40-49,3
+age_range,60-69,1
+race,White,13
+race,Black,9
+race,American Indian Or Alaskan Native,2
+race,Unknown,1
+county,Douglas County,17
+county,Sarpy County,3
+county,Lancaster County,2
+county,Buffalo County,1
+county,Colfax County,1
+county,Sherman County,1
+sex,M,14
+sex,F,11

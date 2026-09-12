@@ -276,8 +276,7 @@ def suppress_small_counties(records: list[dict]) -> None:
             r["county"] = "Other (small county)"
 
 
-def write_csv(records: list[dict], columns: list[str]) -> Path:
-    cutoff = dt.date.today() - dt.timedelta(days=WINDOW_DAYS)
+def write_csv(records: list[dict], columns: list[str], cutoff: dt.date) -> Path:
     path = PROJECT_DIR / f"missing_persons_week_of_{cutoff.isoformat()}.csv"
     rows = sorted(({c: r[c] for c in columns} for r in records),
                   key=lambda r: tuple(r[c] for c in columns))
@@ -286,6 +285,25 @@ def write_csv(records: list[dict], columns: list[str]) -> Path:
         w.writeheader()
         w.writerows(rows)
     print(f"\nwrote {path.name}: {len(rows)} rows, columns {columns}")
+    return path
+
+
+def write_counts_csv(records: list[dict], columns: list[str], cutoff: dt.date) -> Path:
+    """One row per (field, value) with how many people fall in it - e.g. how
+    many 10-19s, how many from Douglas County, how many women. Long format so
+    a chart tool can filter by `field` instead of needing one column per
+    dimension. Counted straight from the same records write_csv() emits, so
+    the two files always agree."""
+    from collections import Counter
+    path = PROJECT_DIR / f"missing_persons_week_of_{cutoff.isoformat()}_counts.csv"
+    with path.open("w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["field", "value", "count"])
+        for field in columns:
+            counts = Counter(r[field] for r in records)
+            for value, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+                w.writerow([field, value, n])
+    print(f"wrote {path.name}: counts for {columns}")
     return path
 
 
@@ -313,14 +331,19 @@ def main() -> None:
     if args.from_cache:
         if not CACHE_PATH.exists():
             sys.exit(f"no cache at {CACHE_PATH.name}; run without --from-cache first")
-        records = json.loads(CACHE_PATH.read_text())
-        print(f"loaded {len(records)} cached records from {CACHE_PATH.name}")
+        cached = json.loads(CACHE_PATH.read_text())
+        records = cached["records"]
+        cutoff = dt.date.fromisoformat(cached["cutoff"])
+        print(f"loaded {len(records)} cached records from {CACHE_PATH.name} "
+              f"(originally scraped for cutoff {cutoff.isoformat()})")
     else:
+        cutoff = dt.date.today() - dt.timedelta(days=WINDOW_DAYS)
         session = build_session()
         rows, mapping = fetch_list(session)
         write_agency_county_map(mapping)
-        records = scrape_from(rows, mapping, session)
-        CACHE_PATH.write_text(json.dumps(records, indent=1))
+        records = scrape_from(rows, mapping, session, cutoff)
+        CACHE_PATH.write_text(json.dumps(
+            {"cutoff": cutoff.isoformat(), "records": records}, indent=1))
         print(f"cached {len(records)} de-identified records to {CACHE_PATH.name}")
 
     summarize(records)
@@ -331,12 +354,12 @@ def main() -> None:
     if args.dry_run:
         print("\n--dry-run: no CSV written")
         return
-    write_csv(records, columns)
+    write_csv(records, columns, cutoff)
+    write_counts_csv(records, columns, cutoff)
 
 
-def scrape_from(rows, mapping, session) -> list[dict]:
+def scrape_from(rows, mapping, session, cutoff: dt.date) -> list[dict]:
     """scrape() split so main() can reuse the already-fetched list + map."""
-    cutoff = dt.date.today() - dt.timedelta(days=WINDOW_DAYS)
     in_window, skipped = [], 0
     for r in rows:
         d = parse_missing_date(r["missing_date"])
