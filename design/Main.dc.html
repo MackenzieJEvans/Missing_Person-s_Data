@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <style>
+    :root {
+      --bg: oklch(98% 0.002 90);
+      --surface: oklch(100% 0 0);
+      --ink: oklch(20% 0.004 90);
+      --ink-strong: oklch(9% 0 0);
+      --line: oklch(88% 0.004 90);
+      --muted: oklch(52% 0.006 90);
+      --track: oklch(93% 0.003 90);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--ink); }
+    .mono { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .toggle-btn {
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .toggle-btn:hover { border-color: var(--ink-strong); }
+    a { color: var(--ink-strong); }
+    a:hover { color: var(--muted); }
+  </style>
+</helmet>
+<div style="min-height: 100%; background: var(--bg); padding: 48px 56px;">
+  <div style="max-width: 1168px; margin: 0 auto;">
+
+    <div class="mono" style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;">Nebraska State Patrol &middot; Public Safety Data</div>
+    <h1 style="margin: 0 0 10px 0; font-size: 40px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; color: var(--ink-strong);">Missing Persons Dashboard</h1>
+    <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.5; color: var(--muted); max-width: 640px;">Unresolved missing-persons cases by report week, de-identified from the state's public missing-persons list.</p>
+    <div class="mono" style="display: flex; gap: 20px; align-items: center; font-size: 13px; color: var(--ink); padding-bottom: 24px; border-bottom: 1px solid var(--line);">
+      <span>Week of Sep 3, 2026</span>
+      <span style="color: var(--line);">&middot;</span>
+      <span>25 open cases</span>
+      <span style="color: var(--line);">&middot;</span>
+      <span style="color: var(--muted);">statepatrol.nebraska.gov</span>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 24px; max-width: 1168px; margin: 32px auto 0;">
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px;">
+      <div style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Open cases</div>
+      <div class="mono" style="font-size: 32px; font-weight: 600; color: var(--ink-strong);">25</div>
+    </div>
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px;">
+      <div style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Counties represented</div>
+      <div class="mono" style="font-size: 32px; font-weight: 600; color: var(--ink-strong);">6</div>
+    </div>
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px;">
+      <div style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Most-affected county</div>
+      <div class="mono" style="font-size: 32px; font-weight: 600; color: var(--ink-strong);">17<span style="font-size: 15px; font-weight: 500; color: var(--muted);"> &middot; Douglas Co.</span></div>
+    </div>
+  </div>
+
+  <div style="max-width: 1168px; margin: 24px auto 0; background: var(--surface); border: 1px solid var(--line); padding: 32px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;">
+      <h2 style="margin: 0; font-size: 19px; font-weight: 600; color: var(--ink-strong);">{{chartTitle}}</h2>
+      <div style="display: flex; gap: 8px;">
+        <sc-for list="{{buttons}}" as="btn" hint-placeholder-count="4">
+          <button class="toggle-btn" onClick="{{btn.select}}" style="{{btn.style}}">{{btn.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <sc-for list="{{items}}" as="item" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 220px; flex-shrink: 0; font-size: 14px; text-align: right; color: var(--ink);">{{item.label}}</div>
+          <div style="flex-grow: 1; height: 26px; background: var(--track); position: relative;">
+            <div style="height: 100%; background: var(--ink-strong); {{item.barStyle}}"></div>
+          </div>
+          <div class="mono" style="width: 100px; flex-shrink: 0; font-size: 14px; text-align: right;">
+            <span style="font-weight: 600;">{{item.count}}</span>
+            <span style="color: var(--muted); font-size: 12px;"> &middot; {{item.pct}}%</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="max-width: 1168px; margin: 24px auto 0; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap;">
+    <p style="margin: 0; max-width: 720px; font-size: 12px; line-height: 1.6; color: var(--muted);">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is shown in 10-year ranges; counties with very few cases can be identifying and are shown as reported.</p>
+    <p style="margin: 0; text-align: right; white-space: nowrap; font-size: 12px; line-height: 1.6; color: var(--muted);">Source: Nebraska State Patrol missing-persons list</p>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const DATA = {
+      age_range: [
+        { label: '10-19', count: 21 },
+        { label: '40-49', count: 3 },
+        { label: '60-69', count: 1 },
+      ],
+      race: [
+        { label: 'White', count: 13 },
+        { label: 'Black', count: 9 },
+        { label: 'Am. Indian / Alaskan Native', count: 2 },
+        { label: 'Unknown', count: 1 },
+      ],
+      county: [
+        { label: 'Douglas County', count: 17 },
+        { label: 'Sarpy County', count: 3 },
+        { label: 'Lancaster County', count: 2 },
+        { label: 'Buffalo County', count: 1 },
+        { label: 'Colfax County', count: 1 },
+        { label: 'Sherman County', count: 1 },
+      ],
+      sex: [
+        { label: 'Male', count: 14 },
+        { label: 'Female', count: 11 },
+      ],
+    };
+
+    const FIELDS = [
+      { key: 'age_range', label: 'Age', chartTitle: 'Cases by age range' },
+      { key: 'race', label: 'Race', chartTitle: 'Cases by race' },
+      { key: 'county', label: 'County', chartTitle: 'Cases by county' },
+      { key: 'sex', label: 'Sex', chartTitle: 'Cases by sex' },
+    ];
+
+    const TOTAL = 25;
+    const active = (this.state && this.state.active) || 'age_range';
+    const rows = DATA[active].slice().sort((a, b) => b.count - a.count);
+    const max = Math.max.apply(null, rows.map((r) => r.count));
+
+    const items = rows.map((r) => ({
+      label: r.label,
+      count: r.count,
+      pct: Math.round((r.count / TOTAL) * 100),
+      barStyle: 'width:' + Math.round((r.count / max) * 100) + '%',
+    }));
+
+    const activeMeta = FIELDS.filter((f) => f.key === active)[0];
+
+    const buttons = FIELDS.map((f) => {
+      const isActive = f.key === active;
+      return {
+        key: f.key,
+        label: f.label,
+        style: isActive
+          ? 'background: var(--ink-strong); color: var(--bg); border-color: var(--ink-strong);'
+          : 'background: transparent; color: var(--ink); border-color: var(--line);',
+        select: () => this.setState({ active: f.key }),
+      };
+    });
+
+    return {
+      chartTitle: activeMeta.chartTitle,
+      items: items,
+      buttons: buttons,
+    };
+  }
+}
+</script>
+</body>
+</html>

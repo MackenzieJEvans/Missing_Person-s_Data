@@ -1,0 +1,435 @@
+<title>Nebraska Missing Persons</title>
+<style>
+  :root {
+    --bg: oklch(13% 0.003 95);
+    --surface: oklch(17% 0.004 95);
+    --ink: oklch(88% 0.004 95);
+    --ink-strong: oklch(98% 0.002 95);
+    --line: oklch(27% 0.006 95);
+    --line-strong: oklch(36% 0.007 95);
+    --muted: oklch(63% 0.006 95);
+    --track: oklch(24% 0.006 95);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  .state-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .state-nav a, .state-nav span.active {
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .state-nav a { color: var(--muted); }
+  .state-nav a:hover { color: var(--ink); border-bottom-color: var(--line-strong); }
+  .state-nav span.active { color: var(--ink-strong); border-bottom-color: var(--ink-strong); }
+  .state-nav .state-sep { color: var(--line-strong); }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .dek {
+    margin: 0 0 24px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink);
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .meta .sep { color: var(--line-strong); }
+  .meta .dim { color: var(--muted); }
+
+  .downloads-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 18px;
+  }
+  .downloads-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 7px 12px 7px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .dl-btn:hover { border-color: var(--line-strong); color: var(--ink-strong); }
+  .dl-btn:hover svg { stroke: var(--ink-strong); }
+  .dl-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .dl-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--muted);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.15s ease;
+  }
+  .dl-ext { color: var(--muted); font-size: 11.5px; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0 0;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+  }
+  .kpi-label {
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .kpi-value {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink-strong);
+    line-height: 1;
+  }
+  .kpi-value .unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 24px;
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink-strong);
+  }
+  .card-head .card-total {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .bars { display: flex; flex-direction: column; gap: 13px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 80px; align-items: center; gap: 14px; }
+  .bar-label { font-size: 13.5px; text-align: right; color: var(--ink); overflow-wrap: anywhere; }
+  .bar-track { height: 22px; background: var(--track); position: relative; }
+  .bar-fill {
+    height: 100%;
+    background: var(--ink-strong);
+    width: 0%;
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-value { font-size: 13.5px; text-align: right; }
+  .bar-value .count { font-weight: 600; color: var(--ink-strong); }
+  .bar-value .pct { color: var(--muted); font-size: 11.5px; }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .foot p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .foot .note { max-width: 56ch; }
+  .foot .src { white-space: nowrap; text-align: right; }
+
+  @media (max-width: 640px) {
+    .kpis { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 96px 1fr 74px; gap: 10px; }
+    .bar-label { font-size: 12.5px; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<div class="wrap">
+  <nav class="state-nav mono">
+    <span class="active">Nebraska</span>
+    <span class="state-sep">/</span>
+    <a href="https://claude.ai/artifact/FGXTYfLrQtXHLCKu1SDaKa">South Dakota</a>
+  </nav>
+
+  <p class="eyebrow mono">Nebraska State Patrol &middot; Public Safety Data</p>
+  <h1>Missing Persons Dashboard</h1>
+  <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+  <div class="meta mono">
+    <span>Week of Sep 3, 2026</span>
+    <span class="sep">&middot;</span>
+    <span>25 open cases</span>
+    <span class="sep">&middot;</span>
+    <span class="dim">statepatrol.nebraska.gov</span>
+  </div>
+
+  <div class="downloads-bar" id="download-bar" hidden>
+    <span class="downloads-label">Download data</span>
+    <button class="dl-btn" id="dl-raw" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+      Weekly records <span class="dl-ext mono">.csv</span>
+    </button>
+    <button class="dl-btn" id="dl-counts" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+      Field counts <span class="dl-ext mono">.csv</span>
+    </button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <p class="kpi-label">Open cases</p>
+      <div class="kpi-value mono">25</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Counties represented</p>
+      <div class="kpi-value mono">6</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Most-affected county</p>
+      <div class="kpi-value mono">17<span class="unit">&middot; Douglas Co.</span></div>
+    </div>
+  </div>
+
+  <div class="charts-grid" id="charts"></div>
+
+  <div class="foot">
+    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is shown in 10-year ranges; counties with very few cases can be identifying and are shown as reported.</p>
+    <p class="src">Source: Nebraska State Patrol missing-persons list</p>
+  </div>
+</div>
+
+<script>
+  var FIELDS = ['age_range', 'race', 'county', 'sex'];
+  var DATA = {
+    age_range: { title: 'Cases by age range', rows: [
+      { label: '10–19', count: 21 },
+      { label: '40–49', count: 3 },
+      { label: '60–69', count: 1 }
+    ]},
+    race: { title: 'Cases by race', rows: [
+      { label: 'White', count: 13 },
+      { label: 'Black', count: 9 },
+      { label: 'Am. Indian / Alaskan Native', count: 2 },
+      { label: 'Unknown', count: 1 }
+    ]},
+    county: { title: 'Cases by county', rows: [
+      { label: 'Douglas County', count: 17 },
+      { label: 'Sarpy County', count: 3 },
+      { label: 'Lancaster County', count: 2 },
+      { label: 'Buffalo County', count: 1 },
+      { label: 'Colfax County', count: 1 },
+      { label: 'Sherman County', count: 1 }
+    ]},
+    sex: { title: 'Cases by sex', rows: [
+      { label: 'Male', count: 14 },
+      { label: 'Female', count: 11 }
+    ]}
+  };
+  var TOTAL = 25;
+
+  var grid = document.getElementById('charts');
+
+  FIELDS.forEach(function (field) {
+    var group = DATA[field];
+    var rows = group.rows.slice().sort(function (a, b) { return b.count - a.count; });
+    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = group.title;
+    var total = document.createElement('span');
+    total.className = 'card-total mono';
+    total.textContent = 'n = ' + TOTAL;
+    head.appendChild(h2);
+    head.appendChild(total);
+    card.appendChild(head);
+
+    var bars = document.createElement('div');
+    bars.className = 'bars';
+
+    rows.forEach(function (r) {
+      var pct = Math.round((r.count / TOTAL) * 100);
+      var width = Math.round((r.count / max) * 100);
+
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+
+      var label = document.createElement('div');
+      label.className = 'bar-label';
+      label.textContent = r.label;
+
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      track.appendChild(fill);
+
+      var value = document.createElement('div');
+      value.className = 'bar-value mono';
+      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+      row.appendChild(label);
+      row.appendChild(track);
+      row.appendChild(value);
+      bars.appendChild(row);
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { fill.style.width = width + '%'; });
+      });
+    });
+
+    card.appendChild(bars);
+    grid.appendChild(card);
+  });
+
+  var RAW_CSV = "age_range,race,county,sex\n" +
+    "10-19,American Indian Or Alaskan Native,Douglas County,F\n" +
+    "10-19,Black,Buffalo County,M\n" +
+    "10-19,Black,Douglas County,F\n" +
+    "10-19,Black,Douglas County,F\n" +
+    "10-19,Black,Douglas County,F\n" +
+    "10-19,Black,Douglas County,M\n" +
+    "10-19,Black,Douglas County,M\n" +
+    "10-19,Black,Douglas County,M\n" +
+    "10-19,Black,Douglas County,M\n" +
+    "10-19,Black,Sarpy County,M\n" +
+    "10-19,White,Colfax County,F\n" +
+    "10-19,White,Douglas County,F\n" +
+    "10-19,White,Douglas County,F\n" +
+    "10-19,White,Douglas County,M\n" +
+    "10-19,White,Douglas County,M\n" +
+    "10-19,White,Douglas County,M\n" +
+    "10-19,White,Douglas County,M\n" +
+    "10-19,White,Douglas County,M\n" +
+    "10-19,White,Lancaster County,M\n" +
+    "10-19,White,Sarpy County,M\n" +
+    "10-19,White,Sherman County,F\n" +
+    "40-49,Unknown,Douglas County,F\n" +
+    "40-49,White,Lancaster County,F\n" +
+    "40-49,White,Sarpy County,F\n" +
+    "60-69,American Indian Or Alaskan Native,Douglas County,M\n";
+
+  var COUNTS_CSV = "field,value,count\n" +
+    "age_range,10-19,21\n" +
+    "age_range,40-49,3\n" +
+    "age_range,60-69,1\n" +
+    "race,White,13\n" +
+    "race,Black,9\n" +
+    "race,American Indian Or Alaskan Native,2\n" +
+    "race,Unknown,1\n" +
+    "county,Douglas County,17\n" +
+    "county,Sarpy County,3\n" +
+    "county,Lancaster County,2\n" +
+    "county,Buffalo County,1\n" +
+    "county,Colfax County,1\n" +
+    "county,Sherman County,1\n" +
+    "sex,M,14\n" +
+    "sex,F,11\n";
+
+  function saveCsv(downloads, filename, data) {
+    downloads.save({ filename: filename, data: data }).catch(function (err) {
+      if (err && err.code === 'declined') return;
+      console.error('download failed', err);
+    });
+  }
+
+  (function () {
+    if (typeof window.claude === 'undefined' || !window.claude.use) return;
+    window.claude.use('downloads').then(function (downloads) {
+      if (!downloads) return;
+      var bar = document.getElementById('download-bar');
+      bar.hidden = false;
+      document.getElementById('dl-raw').addEventListener('click', function () {
+        saveCsv(downloads, 'missing_persons_week_of_2026-09-03.csv', RAW_CSV);
+      });
+      document.getElementById('dl-counts').addEventListener('click', function () {
+        saveCsv(downloads, 'missing_persons_week_of_2026-09-03_counts.csv', COUNTS_CSV);
+      });
+    }).catch(function () {});
+  })();
+</script>

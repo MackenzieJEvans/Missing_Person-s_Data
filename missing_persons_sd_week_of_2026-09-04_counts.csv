@@ -1,0 +1,12 @@
+field,value,count
+age_range,10-19,5
+age_range,20-29,2
+race,American Indian/Alaskan Native,5
+race,White,1
+race,Unknown,1
+county,Pennington,4
+county,Bon Homme,1
+county,Minnehaha,1
+county,Cheyenne River Sioux Tribal PD,1
+sex,Female,3
+sex,Male,4
