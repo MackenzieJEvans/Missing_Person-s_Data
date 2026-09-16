@@ -2,6 +2,7 @@
 .cache_records.json
 .cache_records_sd.json
 .cache_records_ia.json
+.cache_records_nd.json
 venv/
 __pycache__/
 *.pyc
