@@ -1,4 +1,4 @@
-<title>Nebraska Missing Persons</title>
+<title>Iowa Missing Persons</title>
 <style>
   :root {
     --bg: oklch(13% 0.003 95);
@@ -170,7 +170,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 4px;
   }
   .card-head h2 {
     margin: 0;
@@ -183,6 +183,14 @@
     color: var(--muted);
     white-space: nowrap;
   }
+  .card-caveat {
+    margin: 0 0 18px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 46ch;
+  }
+  .card-note-spacer { margin-bottom: 20px; }
 
   .bars { display: flex; flex-direction: column; gap: 13px; }
   .bar-row { display: grid; grid-template-columns: 150px 1fr 80px; align-items: center; gap: 14px; }
@@ -228,22 +236,22 @@
 
 <div class="wrap">
   <nav class="state-nav mono">
-    <span class="active">Nebraska</span>
+    <a href="https://claude.ai/artifact/VcvwTCWEFcirnDRPRaM5Vs">Nebraska</a>
     <span class="state-sep">/</span>
     <a href="https://claude.ai/artifact/FGXTYfLrQtXHLCKu1SDaKa">South Dakota</a>
     <span class="state-sep">/</span>
-    <a href="https://claude.ai/artifact/G45y4XZhM1U9fvnwvPByAN">Iowa</a>
+    <span class="active">Iowa</span>
   </nav>
 
-  <p class="eyebrow mono">Nebraska State Patrol &middot; Public Safety Data</p>
+  <p class="eyebrow mono">Iowa Missing Person Information Clearinghouse &middot; Public Safety Data</p>
   <h1>Missing Persons Dashboard</h1>
   <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
   <div class="meta mono">
-    <span>Week of Sep 3, 2026</span>
+    <span>Week of Sep 8, 2026</span>
     <span class="sep">&middot;</span>
-    <span>25 open cases</span>
+    <span>22 open cases</span>
     <span class="sep">&middot;</span>
-    <span class="dim">statepatrol.nebraska.gov</span>
+    <span class="dim">missingpersons.iowa.gov</span>
   </div>
 
   <div class="downloads-bar" id="download-bar" hidden>
@@ -261,54 +269,59 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">25</div>
+      <div class="kpi-value mono">22</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Counties represented</p>
-      <div class="kpi-value mono">6</div>
+      <div class="kpi-value mono">7</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected county</p>
-      <div class="kpi-value mono">17<span class="unit">&middot; Douglas Co.</span></div>
+      <div class="kpi-value mono">10<span class="unit">&middot; Polk Co.</span></div>
     </div>
   </div>
 
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is shown in 10-year ranges; counties with very few cases can be identifying and are shown as reported.</p>
-    <p class="src">Source: Nebraska State Patrol missing-persons list</p>
+    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Iowa's source exposes only current age, not age when reported missing &mdash; see the note on the age chart before comparing age ranges with Nebraska or South Dakota. Counties with very few cases can be identifying and are shown as reported.</p>
+    <p class="src">Source: Iowa Missing Person Information Clearinghouse (missingpersons.iowa.gov)</p>
   </div>
 </div>
 
 <script>
   var FIELDS = ['age_range', 'race', 'county', 'sex'];
   var DATA = {
-    age_range: { title: 'Cases by age range', rows: [
-      { label: '10–19', count: 21 },
-      { label: '40–49', count: 3 },
-      { label: '60–69', count: 1 }
-    ]},
+    age_range: {
+      title: 'Cases by age (current age)',
+      caveat: 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.',
+      rows: [
+        { label: '10–19', count: 17 },
+        { label: '30–39', count: 1 },
+        { label: '40–49', count: 2 },
+        { label: '50–59', count: 1 },
+        { label: '60–69', count: 1 }
+      ]
+    },
     race: { title: 'Cases by race', rows: [
-      { label: 'White', count: 13 },
-      { label: 'Black', count: 9 },
-      { label: 'Am. Indian / Alaskan Native', count: 2 },
-      { label: 'Unknown', count: 1 }
+      { label: 'White', count: 14 },
+      { label: 'Black', count: 8 }
     ]},
     county: { title: 'Cases by county', rows: [
-      { label: 'Douglas County', count: 17 },
-      { label: 'Sarpy County', count: 3 },
-      { label: 'Lancaster County', count: 2 },
-      { label: 'Buffalo County', count: 1 },
-      { label: 'Colfax County', count: 1 },
-      { label: 'Sherman County', count: 1 }
+      { label: 'Polk', count: 10 },
+      { label: 'Scott', count: 3 },
+      { label: 'Woodbury', count: 3 },
+      { label: 'Black Hawk', count: 2 },
+      { label: 'Linn', count: 2 },
+      { label: 'Dallas', count: 1 },
+      { label: 'Webster', count: 1 }
     ]},
     sex: { title: 'Cases by sex', rows: [
-      { label: 'Male', count: 14 },
-      { label: 'Female', count: 11 }
+      { label: 'Female', count: 11 },
+      { label: 'Male', count: 11 }
     ]}
   };
-  var TOTAL = 25;
+  var TOTAL = 22;
 
   var grid = document.getElementById('charts');
 
@@ -330,6 +343,17 @@
     head.appendChild(h2);
     head.appendChild(total);
     card.appendChild(head);
+
+    if (group.caveat) {
+      var caveat = document.createElement('p');
+      caveat.className = 'card-caveat';
+      caveat.textContent = group.caveat;
+      card.appendChild(caveat);
+    } else {
+      var spacer = document.createElement('div');
+      spacer.className = 'card-note-spacer';
+      card.appendChild(spacer);
+    }
 
     var bars = document.createElement('div');
     bars.className = 'bars';
@@ -370,48 +394,46 @@
   });
 
   var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,American Indian Or Alaskan Native,Douglas County,F\n" +
-    "10-19,Black,Buffalo County,M\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Sarpy County,M\n" +
-    "10-19,White,Colfax County,F\n" +
-    "10-19,White,Douglas County,F\n" +
-    "10-19,White,Douglas County,F\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Lancaster County,M\n" +
-    "10-19,White,Sarpy County,M\n" +
-    "10-19,White,Sherman County,F\n" +
-    "40-49,Unknown,Douglas County,F\n" +
-    "40-49,White,Lancaster County,F\n" +
-    "40-49,White,Sarpy County,F\n" +
-    "60-69,American Indian Or Alaskan Native,Douglas County,M\n";
+    "10-19,Black,Black Hawk,Female\n" +
+    "10-19,Black,Dallas,Female\n" +
+    "10-19,Black,Polk,Female\n" +
+    "10-19,Black,Polk,Male\n" +
+    "10-19,Black,Woodbury,Male\n" +
+    "10-19,White,Linn,Female\n" +
+    "10-19,White,Linn,Female\n" +
+    "10-19,White,Polk,Female\n" +
+    "10-19,White,Polk,Female\n" +
+    "10-19,White,Polk,Female\n" +
+    "10-19,White,Polk,Female\n" +
+    "10-19,White,Polk,Male\n" +
+    "10-19,White,Polk,Male\n" +
+    "10-19,White,Scott,Female\n" +
+    "10-19,White,Scott,Male\n" +
+    "10-19,White,Woodbury,Male\n" +
+    "10-19,White,Woodbury,Male\n" +
+    "30-39,Black,Scott,Male\n" +
+    "40-49,Black,Polk,Male\n" +
+    "40-49,White,Webster,Male\n" +
+    "50-59,White,Black Hawk,Male\n" +
+    "60-69,Black,Polk,Female\n";
 
   var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,21\n" +
-    "age_range,40-49,3\n" +
+    "age_range,10-19,17\n" +
+    "age_range,40-49,2\n" +
+    "age_range,30-39,1\n" +
+    "age_range,50-59,1\n" +
     "age_range,60-69,1\n" +
-    "race,White,13\n" +
-    "race,Black,9\n" +
-    "race,American Indian Or Alaskan Native,2\n" +
-    "race,Unknown,1\n" +
-    "county,Douglas County,17\n" +
-    "county,Sarpy County,3\n" +
-    "county,Lancaster County,2\n" +
-    "county,Buffalo County,1\n" +
-    "county,Colfax County,1\n" +
-    "county,Sherman County,1\n" +
-    "sex,M,14\n" +
-    "sex,F,11\n";
+    "race,White,14\n" +
+    "race,Black,8\n" +
+    "county,Polk,10\n" +
+    "county,Scott,3\n" +
+    "county,Woodbury,3\n" +
+    "county,Black Hawk,2\n" +
+    "county,Linn,2\n" +
+    "county,Dallas,1\n" +
+    "county,Webster,1\n" +
+    "sex,Female,11\n" +
+    "sex,Male,11\n";
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
@@ -427,10 +449,10 @@
       var bar = document.getElementById('download-bar');
       bar.hidden = false;
       document.getElementById('dl-raw').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_week_of_2026-09-03.csv', RAW_CSV);
+        saveCsv(downloads, 'missing_persons_ia_week_of_2026-09-08.csv', RAW_CSV);
       });
       document.getElementById('dl-counts').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_week_of_2026-09-03_counts.csv', COUNTS_CSV);
+        saveCsv(downloads, 'missing_persons_ia_week_of_2026-09-08_counts.csv', COUNTS_CSV);
       });
     }).catch(function () {});
   })();
