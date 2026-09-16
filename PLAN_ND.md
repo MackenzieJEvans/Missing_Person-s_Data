@@ -31,8 +31,11 @@ office).
   counties across North Dakota, Montana and South Dakota. None of the three
   has a single accurate county the way Iowa's Meskwaki Settlement does (see
   PLAN_IA.md) - hence the South Dakota rule applies here, not Iowa's.
-- **Publish target**: not yet decided. Nothing pushed to the public repo
-  until asked.
+- **Publish target**: the same public repo as the other three states,
+  `MackenzieJEvans/Missing_Person-s_Data` (confirmed 2026-09-15). The same
+  privacy posture - row-level CSV, no suppression, residual
+  re-identification risk for single-record counties/agencies accepted and
+  documented - carries over unchanged; see "Privacy posture" below.
 
 ## How the source differs from the other three states
 
@@ -95,14 +98,16 @@ back at the live named listing.
 
 ### Privacy posture
 
-Not yet decided - see "Publish target" above. If North Dakota data joins the
-same public repo, the other three states' posture (row-level CSV, no
-suppression, residual re-identification risk for single-record
-counties/agencies accepted and documented) is the default this would
-inherit, pending confirmation. This week's run is a strong example of the
-risk: all 4 records are singleton counties (Burleigh, Cass, Stark, Morton).
-`--suppress-small-counties` exists in scrape_nd.py if the posture ends up
-different.
+Confirmed 2026-09-15: publish a row-level CSV to the public repo, same as
+the other three states - age_range, race, county, sex, no suppression. The
+residual risk is the same shape: the source site is live and still carries
+name + last-seen date + exact age + agency for the same 7-day window, so any
+county with a single record that week is re-identifiable by cross-referencing
+the published row against the live named list. This week's run is a strong
+example of the risk: all 4 records are singleton counties (Burleigh, Cass,
+Stark, Morton) - the sharpest exposure of any state published so far, purely
+from this being a low-volume week. `--suppress-small-counties` remains
+available in scrape_nd.py if the posture is revisited.
 
 ## Resources
 
