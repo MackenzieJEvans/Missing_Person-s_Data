@@ -1,0 +1,14 @@
+field,value,count
+age_range,10-19,9
+race,White,4
+race,American Indian/Alaskan Native,2
+race,Black,2
+race,Unknown,1
+county,Minnehaha,4
+county,Bon Homme,1
+county,Brown,1
+county,Codington,1
+county,Meade,1
+county,Pennington,1
+sex,Male,5
+sex,Female,4

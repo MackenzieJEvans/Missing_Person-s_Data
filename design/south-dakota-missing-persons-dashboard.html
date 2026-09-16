@@ -65,6 +65,42 @@
     color: var(--muted);
     max-width: 62ch;
   }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -238,10 +274,13 @@
   <p class="eyebrow mono">South Dakota Missing Persons Clearinghouse &middot; Public Safety Data</p>
   <h1>Missing Persons Dashboard</h1>
   <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
   <div class="meta mono">
-    <span>Week of Sep 4, 2026</span>
+    <span id="meta-week">Week of Sep 4, 2026</span>
     <span class="sep">&middot;</span>
-    <span>7 open cases</span>
+    <span id="meta-cases">7 open cases</span>
     <span class="sep">&middot;</span>
     <span class="dim">missingpersons.sd.gov</span>
   </div>
@@ -261,131 +300,242 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">7</div>
+      <div class="kpi-value mono" id="kpi-open">7</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Counties / agencies represented</p>
-      <div class="kpi-value mono">4</div>
+      <div class="kpi-value mono" id="kpi-counties">4</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected area</p>
-      <div class="kpi-value mono">4<span class="unit">&middot; Pennington</span></div>
+      <div class="kpi-value mono" id="kpi-top">4<span class="unit">&middot; Pennington</span></div>
     </div>
   </div>
 
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Tribal-jurisdiction agencies (e.g. Cheyenne River Sioux Tribal PD) appear in the county field by agency name, since they police reservations spanning multiple counties. With only 7 records this week, nearly every cell is small enough to be identifying &mdash; read accordingly.</p>
+    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Tribal-jurisdiction agencies (e.g. Cheyenne River Sioux Tribal PD) appear in the county field by agency name, since they police reservations spanning multiple counties. South Dakota's weekly volume is small &mdash; nearly every cell is small enough to be identifying, in any week shown here &mdash; read accordingly.</p>
     <p class="src">Source: South Dakota Missing Persons Clearinghouse (missingpersons.sd.gov)</p>
   </div>
 </div>
 
 <script>
   var FIELDS = ['age_range', 'race', 'county', 'sex'];
-  var DATA = {
-    age_range: { title: 'Cases by age range', rows: [
-      { label: '10–19', count: 5 },
-      { label: '20–29', count: 2 }
-    ]},
-    race: { title: 'Cases by race', rows: [
-      { label: 'American Indian/Alaskan Native', count: 5 },
-      { label: 'White', count: 1 },
-      { label: 'Unknown', count: 1 }
-    ]},
-    county: { title: 'Cases by county', rows: [
-      { label: 'Pennington', count: 4 },
-      { label: 'Bon Homme', count: 1 },
-      { label: 'Minnehaha', count: 1 },
-      { label: 'Cheyenne River Sioux Tribal PD', count: 1 }
-    ]},
-    sex: { title: 'Cases by sex', rows: [
-      { label: 'Male', count: 4 },
-      { label: 'Female', count: 3 }
-    ]}
+  var FIELD_TITLES = {
+    age_range: 'Cases by age range',
+    race: 'Cases by race',
+    county: 'Cases by county',
+    sex: 'Cases by sex'
   };
-  var TOTAL = 7;
 
-  var grid = document.getElementById('charts');
+  var WEEK_ORDER = ['2026-09-08', '2026-09-04'];
 
-  FIELDS.forEach(function (field) {
-    var group = DATA[field];
-    var rows = group.rows.slice().sort(function (a, b) { return b.count - a.count; });
-    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+  var WEEKS = {
+    '2026-09-04': {
+      shortLabel: 'Sep 4',
+      metaLabel: 'Week of Sep 4, 2026',
+      total: 7,
+      countiesRepresented: 4,
+      topArea: { label: 'Pennington', count: 4 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 5 },
+          { label: '20–29', count: 2 }
+        ],
+        race: [
+          { label: 'American Indian/Alaskan Native', count: 5 },
+          { label: 'White', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Pennington', count: 4 },
+          { label: 'Bon Homme', count: 1 },
+          { label: 'Minnehaha', count: 1 },
+          { label: 'Cheyenne River Sioux Tribal PD', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 4 },
+          { label: 'Female', count: 3 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-09-04.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-09-04_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Female\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,Unknown,Bon Homme,Male\n" +
+        "10-19,White,Minnehaha,Female\n" +
+        "20-29,American Indian/Alaskan Native,Cheyenne River Sioux Tribal PD,Female\n" +
+        "20-29,American Indian/Alaskan Native,Pennington,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,5\n" +
+        "age_range,20-29,2\n" +
+        "race,American Indian/Alaskan Native,5\n" +
+        "race,White,1\n" +
+        "race,Unknown,1\n" +
+        "county,Pennington,4\n" +
+        "county,Bon Homme,1\n" +
+        "county,Minnehaha,1\n" +
+        "county,Cheyenne River Sioux Tribal PD,1\n" +
+        "sex,Female,3\n" +
+        "sex,Male,4\n"
+    },
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      total: 9,
+      countiesRepresented: 6,
+      topArea: { label: 'Minnehaha', count: 4 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 9 }
+        ],
+        race: [
+          { label: 'White', count: 4 },
+          { label: 'American Indian/Alaskan Native', count: 2 },
+          { label: 'Black', count: 2 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Minnehaha', count: 4 },
+          { label: 'Bon Homme', count: 1 },
+          { label: 'Brown', count: 1 },
+          { label: 'Codington', count: 1 },
+          { label: 'Meade', count: 1 },
+          { label: 'Pennington', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 5 },
+          { label: 'Female', count: 4 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-09-08.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-09-08_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Brown,Female\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,Black,Minnehaha,Female\n" +
+        "10-19,Black,Minnehaha,Female\n" +
+        "10-19,Unknown,Bon Homme,Male\n" +
+        "10-19,White,Codington,Male\n" +
+        "10-19,White,Meade,Male\n" +
+        "10-19,White,Minnehaha,Female\n" +
+        "10-19,White,Minnehaha,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,9\n" +
+        "race,White,4\n" +
+        "race,American Indian/Alaskan Native,2\n" +
+        "race,Black,2\n" +
+        "race,Unknown,1\n" +
+        "county,Minnehaha,4\n" +
+        "county,Bon Homme,1\n" +
+        "county,Brown,1\n" +
+        "county,Codington,1\n" +
+        "county,Meade,1\n" +
+        "county,Pennington,1\n" +
+        "sex,Male,5\n" +
+        "sex,Female,4\n"
+    }
+  };
 
-    var card = document.createElement('div');
-    card.className = 'card';
+  var currentWeek = WEEK_ORDER[0];
+  var downloadsApi = null;
 
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = group.title;
-    var total = document.createElement('span');
-    total.className = 'card-total mono';
-    total.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(total);
-    card.appendChild(head);
-
-    var bars = document.createElement('div');
-    bars.className = 'bars';
-
-    rows.forEach(function (r) {
-      var pct = Math.round((r.count / TOTAL) * 100);
-      var width = Math.round((r.count / max) * 100);
-
-      var row = document.createElement('div');
-      row.className = 'bar-row';
-
-      var label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = r.label;
-
-      var track = document.createElement('div');
-      track.className = 'bar-track';
-      var fill = document.createElement('div');
-      fill.className = 'bar-fill';
-      track.appendChild(fill);
-
-      var value = document.createElement('div');
-      value.className = 'bar-value mono';
-      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
-
-      row.appendChild(label);
-      row.appendChild(track);
-      row.appendChild(value);
-      bars.appendChild(row);
-
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { fill.style.width = width + '%'; });
-      });
-    });
-
-    card.appendChild(bars);
-    grid.appendChild(card);
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
   });
 
-  var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,American Indian/Alaskan Native,Pennington,Female\n" +
-    "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
-    "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
-    "10-19,Unknown,Bon Homme,Male\n" +
-    "10-19,White,Minnehaha,Female\n" +
-    "20-29,American Indian/Alaskan Native,Cheyenne River Sioux Tribal PD,Female\n" +
-    "20-29,American Indian/Alaskan Native,Pennington,Male\n";
+  function buildCharts(data, total) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
 
-  var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,5\n" +
-    "age_range,20-29,2\n" +
-    "race,American Indian/Alaskan Native,5\n" +
-    "race,White,1\n" +
-    "race,Unknown,1\n" +
-    "county,Pennington,4\n" +
-    "county,Bon Homme,1\n" +
-    "county,Minnehaha,1\n" +
-    "county,Cheyenne River Sioux Tribal PD,1\n" +
-    "sex,Female,3\n" +
-    "sex,Male,4\n";
+    FIELDS.forEach(function (field) {
+      var rows = data[field].slice().sort(function (a, b) { return b.count - a.count; });
+      var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var head = document.createElement('div');
+      head.className = 'card-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = FIELD_TITLES[field];
+      var totalEl = document.createElement('span');
+      totalEl.className = 'card-total mono';
+      totalEl.textContent = 'n = ' + total;
+      head.appendChild(h2);
+      head.appendChild(totalEl);
+      card.appendChild(head);
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+
+      rows.forEach(function (r) {
+        var pct = Math.round((r.count / total) * 100);
+        var width = Math.round((r.count / max) * 100);
+
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'bar-label';
+        lbl.textContent = r.label;
+
+        var track = document.createElement('div');
+        track.className = 'bar-track';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        track.appendChild(fill);
+
+        var value = document.createElement('div');
+        value.className = 'bar-value mono';
+        value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(value);
+        bars.appendChild(row);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = width + '%'; });
+        });
+      });
+
+      card.appendChild(bars);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open cases';
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-counties').textContent = w.countiesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
+
+    buildCharts(w.data, w.total);
+  }
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
@@ -394,17 +544,22 @@
     });
   }
 
+  renderWeek(currentWeek);
+
   (function () {
     if (typeof window.claude === 'undefined' || !window.claude.use) return;
     window.claude.use('downloads').then(function (downloads) {
       if (!downloads) return;
+      downloadsApi = downloads;
       var bar = document.getElementById('download-bar');
       bar.hidden = false;
       document.getElementById('dl-raw').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_sd_week_of_2026-09-04.csv', RAW_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.rawFilename, w.rawCsv);
       });
       document.getElementById('dl-counts').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_sd_week_of_2026-09-04_counts.csv', COUNTS_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.countsFilename, w.countsCsv);
       });
     }).catch(function () {});
   })();

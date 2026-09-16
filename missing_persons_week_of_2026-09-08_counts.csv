@@ -1,0 +1,23 @@
+field,value,count
+age_range,10-19,25
+age_range,30-39,3
+age_range,20-29,1
+age_range,40-49,1
+age_range,50-59,1
+age_range,60-69,1
+age_range,70-79,1
+race,White,18
+race,Black,9
+race,American Indian Or Alaskan Native,4
+race,Asian Or Pacific Islander,1
+race,Unknown,1
+county,Douglas County,23
+county,Lancaster County,4
+county,Adams County,1
+county,Custer County,1
+county,Dawson County,1
+county,Hall County,1
+county,Madison County,1
+county,Sarpy County,1
+sex,F,17
+sex,M,16

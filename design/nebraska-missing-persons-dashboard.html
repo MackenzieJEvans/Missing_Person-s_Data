@@ -65,6 +65,42 @@
     color: var(--muted);
     max-width: 62ch;
   }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -238,10 +274,13 @@
   <p class="eyebrow mono">Nebraska State Patrol &middot; Public Safety Data</p>
   <h1>Missing Persons Dashboard</h1>
   <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
   <div class="meta mono">
-    <span>Week of Sep 3, 2026</span>
+    <span id="meta-week">Week of Sep 3, 2026</span>
     <span class="sep">&middot;</span>
-    <span>25 open cases</span>
+    <span id="meta-cases">25 open cases</span>
     <span class="sep">&middot;</span>
     <span class="dim">statepatrol.nebraska.gov</span>
   </div>
@@ -261,15 +300,15 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">25</div>
+      <div class="kpi-value mono" id="kpi-open">25</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Counties represented</p>
-      <div class="kpi-value mono">6</div>
+      <div class="kpi-value mono" id="kpi-counties">6</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected county</p>
-      <div class="kpi-value mono">17<span class="unit">&middot; Douglas Co.</span></div>
+      <div class="kpi-value mono" id="kpi-top">17<span class="unit">&middot; Douglas Co.</span></div>
     </div>
   </div>
 
@@ -283,135 +322,288 @@
 
 <script>
   var FIELDS = ['age_range', 'race', 'county', 'sex'];
-  var DATA = {
-    age_range: { title: 'Cases by age range', rows: [
-      { label: '10–19', count: 21 },
-      { label: '40–49', count: 3 },
-      { label: '60–69', count: 1 }
-    ]},
-    race: { title: 'Cases by race', rows: [
-      { label: 'White', count: 13 },
-      { label: 'Black', count: 9 },
-      { label: 'Am. Indian / Alaskan Native', count: 2 },
-      { label: 'Unknown', count: 1 }
-    ]},
-    county: { title: 'Cases by county', rows: [
-      { label: 'Douglas County', count: 17 },
-      { label: 'Sarpy County', count: 3 },
-      { label: 'Lancaster County', count: 2 },
-      { label: 'Buffalo County', count: 1 },
-      { label: 'Colfax County', count: 1 },
-      { label: 'Sherman County', count: 1 }
-    ]},
-    sex: { title: 'Cases by sex', rows: [
-      { label: 'Male', count: 14 },
-      { label: 'Female', count: 11 }
-    ]}
+  var FIELD_TITLES = {
+    age_range: 'Cases by age range',
+    race: 'Cases by race',
+    county: 'Cases by county',
+    sex: 'Cases by sex'
   };
-  var TOTAL = 25;
 
-  var grid = document.getElementById('charts');
+  var WEEK_ORDER = ['2026-09-08', '2026-09-03'];
 
-  FIELDS.forEach(function (field) {
-    var group = DATA[field];
-    var rows = group.rows.slice().sort(function (a, b) { return b.count - a.count; });
-    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+  var WEEKS = {
+    '2026-09-03': {
+      shortLabel: 'Sep 3',
+      metaLabel: 'Week of Sep 3, 2026',
+      total: 25,
+      countiesRepresented: 6,
+      topArea: { label: 'Douglas Co.', count: 17 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 21 },
+          { label: '40–49', count: 3 },
+          { label: '60–69', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 13 },
+          { label: 'Black', count: 9 },
+          { label: 'Am. Indian / Alaskan Native', count: 2 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 17 },
+          { label: 'Sarpy County', count: 3 },
+          { label: 'Lancaster County', count: 2 },
+          { label: 'Buffalo County', count: 1 },
+          { label: 'Colfax County', count: 1 },
+          { label: 'Sherman County', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 14 },
+          { label: 'Female', count: 11 }
+        ]
+      },
+      rawFilename: 'missing_persons_week_of_2026-09-03.csv',
+      countsFilename: 'missing_persons_week_of_2026-09-03_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,F\n" +
+        "10-19,Black,Buffalo County,M\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Sarpy County,M\n" +
+        "10-19,White,Colfax County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Sarpy County,M\n" +
+        "10-19,White,Sherman County,F\n" +
+        "40-49,Unknown,Douglas County,F\n" +
+        "40-49,White,Lancaster County,F\n" +
+        "40-49,White,Sarpy County,F\n" +
+        "60-69,American Indian Or Alaskan Native,Douglas County,M\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,21\n" +
+        "age_range,40-49,3\n" +
+        "age_range,60-69,1\n" +
+        "race,White,13\n" +
+        "race,Black,9\n" +
+        "race,American Indian Or Alaskan Native,2\n" +
+        "race,Unknown,1\n" +
+        "county,Douglas County,17\n" +
+        "county,Sarpy County,3\n" +
+        "county,Lancaster County,2\n" +
+        "county,Buffalo County,1\n" +
+        "county,Colfax County,1\n" +
+        "county,Sherman County,1\n" +
+        "sex,M,14\n" +
+        "sex,F,11\n"
+    },
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      total: 33,
+      countiesRepresented: 8,
+      topArea: { label: 'Douglas Co.', count: 23 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 25 },
+          { label: '30–39', count: 3 },
+          { label: '20–29', count: 1 },
+          { label: '40–49', count: 1 },
+          { label: '50–59', count: 1 },
+          { label: '60–69', count: 1 },
+          { label: '70–79', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 18 },
+          { label: 'Black', count: 9 },
+          { label: 'Am. Indian / Alaskan Native', count: 4 },
+          { label: 'Asian / Pacific Islander', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 23 },
+          { label: 'Lancaster County', count: 4 },
+          { label: 'Adams County', count: 1 },
+          { label: 'Custer County', count: 1 },
+          { label: 'Dawson County', count: 1 },
+          { label: 'Hall County', count: 1 },
+          { label: 'Madison County', count: 1 },
+          { label: 'Sarpy County', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 17 },
+          { label: 'Male', count: 16 }
+        ]
+      },
+      rawFilename: 'missing_persons_week_of_2026-09-08.csv',
+      countsFilename: 'missing_persons_week_of_2026-09-08_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,F\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,M\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,M\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Lancaster County,F\n" +
+        "10-19,Black,Sarpy County,F\n" +
+        "10-19,Unknown,Adams County,F\n" +
+        "10-19,White,Dawson County,M\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Hall County,F\n" +
+        "10-19,White,Lancaster County,F\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Madison County,F\n" +
+        "20-29,White,Custer County,F\n" +
+        "30-39,American Indian Or Alaskan Native,Douglas County,F\n" +
+        "30-39,Black,Douglas County,M\n" +
+        "30-39,White,Lancaster County,F\n" +
+        "40-49,White,Douglas County,F\n" +
+        "50-59,White,Douglas County,M\n" +
+        "60-69,American Indian Or Alaskan Native,Douglas County,M\n" +
+        "70-79,White,Douglas County,F\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,25\n" +
+        "age_range,30-39,3\n" +
+        "age_range,20-29,1\n" +
+        "age_range,40-49,1\n" +
+        "age_range,50-59,1\n" +
+        "age_range,60-69,1\n" +
+        "age_range,70-79,1\n" +
+        "race,White,18\n" +
+        "race,Black,9\n" +
+        "race,American Indian Or Alaskan Native,4\n" +
+        "race,Asian Or Pacific Islander,1\n" +
+        "race,Unknown,1\n" +
+        "county,Douglas County,23\n" +
+        "county,Lancaster County,4\n" +
+        "county,Adams County,1\n" +
+        "county,Custer County,1\n" +
+        "county,Dawson County,1\n" +
+        "county,Hall County,1\n" +
+        "county,Madison County,1\n" +
+        "county,Sarpy County,1\n" +
+        "sex,F,17\n" +
+        "sex,M,16\n"
+    }
+  };
 
-    var card = document.createElement('div');
-    card.className = 'card';
+  var currentWeek = WEEK_ORDER[0];
+  var downloadsApi = null;
 
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = group.title;
-    var total = document.createElement('span');
-    total.className = 'card-total mono';
-    total.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(total);
-    card.appendChild(head);
-
-    var bars = document.createElement('div');
-    bars.className = 'bars';
-
-    rows.forEach(function (r) {
-      var pct = Math.round((r.count / TOTAL) * 100);
-      var width = Math.round((r.count / max) * 100);
-
-      var row = document.createElement('div');
-      row.className = 'bar-row';
-
-      var label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = r.label;
-
-      var track = document.createElement('div');
-      track.className = 'bar-track';
-      var fill = document.createElement('div');
-      fill.className = 'bar-fill';
-      track.appendChild(fill);
-
-      var value = document.createElement('div');
-      value.className = 'bar-value mono';
-      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
-
-      row.appendChild(label);
-      row.appendChild(track);
-      row.appendChild(value);
-      bars.appendChild(row);
-
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { fill.style.width = width + '%'; });
-      });
-    });
-
-    card.appendChild(bars);
-    grid.appendChild(card);
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
   });
 
-  var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,American Indian Or Alaskan Native,Douglas County,F\n" +
-    "10-19,Black,Buffalo County,M\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,F\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Douglas County,M\n" +
-    "10-19,Black,Sarpy County,M\n" +
-    "10-19,White,Colfax County,F\n" +
-    "10-19,White,Douglas County,F\n" +
-    "10-19,White,Douglas County,F\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Douglas County,M\n" +
-    "10-19,White,Lancaster County,M\n" +
-    "10-19,White,Sarpy County,M\n" +
-    "10-19,White,Sherman County,F\n" +
-    "40-49,Unknown,Douglas County,F\n" +
-    "40-49,White,Lancaster County,F\n" +
-    "40-49,White,Sarpy County,F\n" +
-    "60-69,American Indian Or Alaskan Native,Douglas County,M\n";
+  function buildCharts(data, total) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
 
-  var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,21\n" +
-    "age_range,40-49,3\n" +
-    "age_range,60-69,1\n" +
-    "race,White,13\n" +
-    "race,Black,9\n" +
-    "race,American Indian Or Alaskan Native,2\n" +
-    "race,Unknown,1\n" +
-    "county,Douglas County,17\n" +
-    "county,Sarpy County,3\n" +
-    "county,Lancaster County,2\n" +
-    "county,Buffalo County,1\n" +
-    "county,Colfax County,1\n" +
-    "county,Sherman County,1\n" +
-    "sex,M,14\n" +
-    "sex,F,11\n";
+    FIELDS.forEach(function (field) {
+      var rows = data[field].slice().sort(function (a, b) { return b.count - a.count; });
+      var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var head = document.createElement('div');
+      head.className = 'card-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = FIELD_TITLES[field];
+      var totalEl = document.createElement('span');
+      totalEl.className = 'card-total mono';
+      totalEl.textContent = 'n = ' + total;
+      head.appendChild(h2);
+      head.appendChild(totalEl);
+      card.appendChild(head);
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+
+      rows.forEach(function (r) {
+        var pct = Math.round((r.count / total) * 100);
+        var width = Math.round((r.count / max) * 100);
+
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'bar-label';
+        lbl.textContent = r.label;
+
+        var track = document.createElement('div');
+        track.className = 'bar-track';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        track.appendChild(fill);
+
+        var value = document.createElement('div');
+        value.className = 'bar-value mono';
+        value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(value);
+        bars.appendChild(row);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = width + '%'; });
+        });
+      });
+
+      card.appendChild(bars);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open cases';
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-counties').textContent = w.countiesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
+
+    buildCharts(w.data, w.total);
+  }
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
@@ -420,17 +612,22 @@
     });
   }
 
+  renderWeek(currentWeek);
+
   (function () {
     if (typeof window.claude === 'undefined' || !window.claude.use) return;
     window.claude.use('downloads').then(function (downloads) {
       if (!downloads) return;
+      downloadsApi = downloads;
       var bar = document.getElementById('download-bar');
       bar.hidden = false;
       document.getElementById('dl-raw').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_week_of_2026-09-03.csv', RAW_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.rawFilename, w.rawCsv);
       });
       document.getElementById('dl-counts').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_week_of_2026-09-03_counts.csv', COUNTS_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.countsFilename, w.countsCsv);
       });
     }).catch(function () {});
   })();
