@@ -1,0 +1,17 @@
+field,value,count
+age_range,10-19,17
+age_range,40-49,2
+age_range,30-39,1
+age_range,50-59,1
+age_range,60-69,1
+race,White,14
+race,Black,8
+county,Polk,10
+county,Scott,3
+county,Woodbury,3
+county,Black Hawk,2
+county,Linn,2
+county,Dallas,1
+county,Webster,1
+sex,Female,11
+sex,Male,11

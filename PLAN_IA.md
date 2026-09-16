@@ -32,9 +32,12 @@ Clearinghouse, a Drupal 10 site run by the Iowa Department of Public Safety).
   South Dakota's non-tribal rows. If this reasoning turns out to be wrong -
   i.e. Meskwaki jurisdiction turns out not to track Tama County cleanly -
   revert to naming the agency directly, per the South Dakota precedent.
-- **Publish target**: not yet decided (same posture as South Dakota was
-  before its own publish decision). Nothing is pushed to the public repo
-  until asked.
+- **Publish target**: the same public repo as Nebraska and South Dakota,
+  `MackenzieJEvans/Missing_Person-s_Data` (confirmed 2026-09-15). Nebraska's
+  and South Dakota's privacy posture - row-level CSV, no suppression,
+  residual re-identification risk for single-record counties/agencies
+  accepted and documented - carries over unchanged; see "Privacy posture"
+  below.
 
 ## How the source differs from Nebraska and South Dakota
 
@@ -130,13 +133,15 @@ live named listing.
 
 ### Privacy posture
 
-Not yet decided - see "Publish target" above. If Iowa data joins the same
-public repo, Nebraska's and South Dakota's posture (row-level CSV, no
-suppression, residual re-identification risk for single-record
-counties/agencies accepted and documented) is the default this would
-inherit, pending confirmation. `--suppress-small-counties` exists in
-scrape_ia.py (rolls counties with < 5 records that week into "Other (small
-county)") if the posture ends up different.
+Confirmed 2026-09-15: publish a row-level CSV to the public repo, same as
+Nebraska and South Dakota - age_range, race, county, sex, no suppression.
+The residual risk is the same shape: the source site is live and still
+carries name + last-contact date + exact age + agency for the same 7-day
+window, so any county with a single record that week is re-identifiable by
+cross-referencing the published row against the live named list. This week's
+run has two such singletons (Dallas, Webster). `--suppress-small-counties`
+remains available in scrape_ia.py (rolls counties with < 5 records that week
+into "Other (small county)") if the posture is revisited.
 
 ## Resources
 
