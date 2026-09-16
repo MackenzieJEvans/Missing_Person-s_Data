@@ -3,6 +3,8 @@
 .cache_records_sd.json
 .cache_records_ia.json
 .cache_records_nd.json
+.cache_records_ok.json
+.cache_records_mo.json
 venv/
 __pycache__/
 *.pyc
