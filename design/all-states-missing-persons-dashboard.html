@@ -207,30 +207,6 @@
   .bar-value .count { font-weight: 600; color: var(--ink-strong); }
   .bar-value .pct { color: var(--muted); font-size: 11.5px; }
 
-  .age-subgroup { margin-top: 18px; }
-  .age-subgroup:first-of-type { margin-top: 0; }
-  .age-subgroup + .age-subgroup {
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-  }
-  .age-subgroup-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .age-subgroup-title {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .age-subgroup-n {
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
   .foot {
     display: flex;
     justify-content: space-between;
@@ -310,7 +286,7 @@
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Each state's total is its own weekly snapshot for the week of Sep 8, 2026, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age is kept as two separate groups rather than one: Nebraska and South Dakota report age when a person was reported missing, while Iowa and North Dakota expose only current age &mdash; stacking them as a single measure would misrepresent both. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
+    <p class="note">Each state's total is its own weekly snapshot for the week of Sep 8, 2026, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age combines Nebraska's and South Dakota's age when reported missing with Iowa's and North Dakota's current age &mdash; for a single week's snapshot these nearly coincide, but they aren't strictly the same measure; see each state's own page if that distinction matters for your use. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
     <p class="src">Sources: Nebraska State Patrol &middot; South Dakota Missing Persons Clearinghouse &middot; Iowa Missing Person Information Clearinghouse &middot; North Dakota Attorney General</p>
   </div>
 </div>
@@ -333,24 +309,16 @@
     { label: 'Female', count: 34 },
     { label: 'Male', count: 34 }
   ];
-  var AGE_REPORTED_DATA = [
-    { label: '10–19', count: 34 },
-    { label: '30–39', count: 3 },
+  var AGE_DATA = [
+    { label: '10–19', count: 54 },
+    { label: '30–39', count: 4 },
+    { label: '40–49', count: 3 },
+    { label: '60–69', count: 3 },
+    { label: '50–59', count: 2 },
     { label: '20–29', count: 1 },
-    { label: '40–49', count: 1 },
-    { label: '50–59', count: 1 },
-    { label: '60–69', count: 1 },
     { label: '70–79', count: 1 }
   ];
-  var AGE_CURRENT_DATA = [
-    { label: '10–19', count: 20 },
-    { label: '40–49', count: 2 },
-    { label: '60–69', count: 2 },
-    { label: '30–39', count: 1 },
-    { label: '50–59', count: 1 }
-  ];
-  var AGE_REPORTED_TOTAL = 42;
-  var AGE_CURRENT_TOTAL = 26;
+  var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
   var TOTAL = 68;
 
   function buildBars(container, rows, total) {
@@ -386,7 +354,7 @@
     });
   }
 
-  function buildCard(title, rows, total) {
+  function buildCard(title, rows, total, caveat) {
     var sorted = rows.slice().sort(function (a, b) { return b.count - a.count; });
 
     var card = document.createElement('div');
@@ -403,9 +371,16 @@
     head.appendChild(totalEl);
     card.appendChild(head);
 
-    var spacer = document.createElement('div');
-    spacer.className = 'card-note-spacer';
-    card.appendChild(spacer);
+    if (caveat) {
+      var caveatEl = document.createElement('p');
+      caveatEl.className = 'card-caveat';
+      caveatEl.textContent = caveat;
+      card.appendChild(caveatEl);
+    } else {
+      var spacer = document.createElement('div');
+      spacer.className = 'card-note-spacer';
+      card.appendChild(spacer);
+    }
 
     var bars = document.createElement('div');
     bars.className = 'bars';
@@ -415,62 +390,9 @@
     return card;
   }
 
-  function buildAgeCard() {
-    var card = document.createElement('div');
-    card.className = 'card';
-
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = 'Cases by age';
-    var totalEl = document.createElement('span');
-    totalEl.className = 'card-total mono';
-    totalEl.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(totalEl);
-    card.appendChild(head);
-
-    var caveat = document.createElement('p');
-    caveat.className = 'card-caveat';
-    caveat.textContent = 'Nebraska and South Dakota report age when reported missing; Iowa and North Dakota expose only current age. Kept as separate groups rather than combined into one measure.';
-    card.appendChild(caveat);
-
-    var groups = [
-      { title: 'Age when reported · NE + SD', total: AGE_REPORTED_TOTAL, rows: AGE_REPORTED_DATA },
-      { title: 'Current age · IA + ND', total: AGE_CURRENT_TOTAL, rows: AGE_CURRENT_DATA }
-    ];
-
-    groups.forEach(function (g) {
-      var sub = document.createElement('div');
-      sub.className = 'age-subgroup';
-
-      var subHead = document.createElement('div');
-      subHead.className = 'age-subgroup-head';
-      var subTitle = document.createElement('span');
-      subTitle.className = 'age-subgroup-title';
-      subTitle.textContent = g.title;
-      var subN = document.createElement('span');
-      subN.className = 'age-subgroup-n mono';
-      subN.textContent = 'n = ' + g.total;
-      subHead.appendChild(subTitle);
-      subHead.appendChild(subN);
-      sub.appendChild(subHead);
-
-      var bars = document.createElement('div');
-      bars.className = 'bars';
-      var sorted = g.rows.slice().sort(function (a, b) { return b.count - a.count; });
-      buildBars(bars, sorted, g.total);
-      sub.appendChild(bars);
-
-      card.appendChild(sub);
-    });
-
-    return card;
-  }
-
   var grid = document.getElementById('charts');
   grid.appendChild(buildCard('Cases by state', STATE_DATA, TOTAL));
-  grid.appendChild(buildAgeCard());
+  grid.appendChild(buildCard('Cases by age', AGE_DATA, TOTAL, AGE_CAVEAT));
   grid.appendChild(buildCard('Cases by race', RACE_DATA, TOTAL));
   grid.appendChild(buildCard('Cases by sex', SEX_DATA, TOTAL));
 
@@ -486,18 +408,13 @@
     "ALL,race,Asian / Pacific Islander,1\n" +
     "ALL,sex,Female,34\n" +
     "ALL,sex,Male,34\n" +
-    "NE_SD,age_when_reported,10-19,34\n" +
-    "NE_SD,age_when_reported,20-29,1\n" +
-    "NE_SD,age_when_reported,30-39,3\n" +
-    "NE_SD,age_when_reported,40-49,1\n" +
-    "NE_SD,age_when_reported,50-59,1\n" +
-    "NE_SD,age_when_reported,60-69,1\n" +
-    "NE_SD,age_when_reported,70-79,1\n" +
-    "IA_ND,age_current,10-19,20\n" +
-    "IA_ND,age_current,30-39,1\n" +
-    "IA_ND,age_current,40-49,2\n" +
-    "IA_ND,age_current,50-59,1\n" +
-    "IA_ND,age_current,60-69,2\n";
+    "ALL,age_range,10-19,54\n" +
+    "ALL,age_range,20-29,1\n" +
+    "ALL,age_range,30-39,4\n" +
+    "ALL,age_range,40-49,3\n" +
+    "ALL,age_range,50-59,2\n" +
+    "ALL,age_range,60-69,3\n" +
+    "ALL,age_range,70-79,1\n";
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
