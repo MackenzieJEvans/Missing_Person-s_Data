@@ -1,4 +1,4 @@
-<title>North Dakota Missing Persons</title>
+<title>All States Missing Persons</title>
 <style>
   :root {
     --bg: oklch(13% 0.003 95);
@@ -26,6 +26,7 @@
   .state-nav {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     font-size: 12px;
     letter-spacing: 0.06em;
@@ -63,7 +64,7 @@
     font-size: 16px;
     line-height: 1.55;
     color: var(--muted);
-    max-width: 62ch;
+    max-width: 66ch;
   }
   .meta {
     display: flex;
@@ -188,7 +189,7 @@
     font-size: 11.5px;
     line-height: 1.5;
     color: var(--muted);
-    max-width: 46ch;
+    max-width: 50ch;
   }
   .card-note-spacer { margin-bottom: 20px; }
 
@@ -206,6 +207,30 @@
   .bar-value .count { font-weight: 600; color: var(--ink-strong); }
   .bar-value .pct { color: var(--muted); font-size: 11.5px; }
 
+  .age-subgroup { margin-top: 18px; }
+  .age-subgroup:first-of-type { margin-top: 0; }
+  .age-subgroup + .age-subgroup {
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .age-subgroup-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .age-subgroup-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .age-subgroup-n {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
   .foot {
     display: flex;
     justify-content: space-between;
@@ -221,14 +246,15 @@
     line-height: 1.6;
     color: var(--muted);
   }
-  .foot .note { max-width: 56ch; }
-  .foot .src { white-space: nowrap; text-align: right; }
+  .foot .note { max-width: 60ch; }
+  .foot .src { text-align: right; max-width: 32ch; }
 
   @media (max-width: 640px) {
     .kpis { grid-template-columns: 1fr; }
     .charts-grid { grid-template-columns: 1fr; }
     .bar-row { grid-template-columns: 96px 1fr 74px; gap: 10px; }
     .bar-label { font-size: 12.5px; }
+    .foot .src { text-align: left; max-width: none; }
   }
 </style>
 
@@ -236,7 +262,7 @@
 
 <div class="wrap">
   <nav class="state-nav mono">
-    <a href="https://claude.ai/artifact/FqCoKx6jtgYWj9evUWijtc">All</a>
+    <span class="active">All</span>
     <span class="state-sep">/</span>
     <a href="https://claude.ai/artifact/VcvwTCWEFcirnDRPRaM5Vs">Nebraska</a>
     <span class="state-sep">/</span>
@@ -244,128 +270,100 @@
     <span class="state-sep">/</span>
     <a href="https://claude.ai/artifact/G45y4XZhM1U9fvnwvPByAN">Iowa</a>
     <span class="state-sep">/</span>
-    <span class="active">North Dakota</span>
+    <a href="https://claude.ai/artifact/4YtCuPhYVfr64kVMUsNZzg">North Dakota</a>
   </nav>
 
-  <p class="eyebrow mono">North Dakota Attorney General &middot; Public Safety Data</p>
+  <p class="eyebrow mono">Nebraska &middot; South Dakota &middot; Iowa &middot; North Dakota</p>
   <h1>Missing Persons Dashboard</h1>
-  <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+  <p class="dek">Combined unresolved missing-persons cases across all four states for the week of Sep 8, 2026 &mdash; the most recent week common to every state page. See each state's own page for county-level detail and, for Nebraska and South Dakota, an earlier week.</p>
   <div class="meta mono">
     <span>Week of Sep 8, 2026</span>
     <span class="sep">&middot;</span>
-    <span>4 open cases</span>
+    <span>68 open cases</span>
     <span class="sep">&middot;</span>
-    <span class="dim">missingpersons.nd.gov</span>
+    <span class="dim">4 states combined</span>
   </div>
 
   <div class="downloads-bar" id="download-bar" hidden>
     <span class="downloads-label">Download data</span>
-    <button class="dl-btn" id="dl-raw" type="button">
-      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
-      Weekly records <span class="dl-ext mono">.csv</span>
-    </button>
     <button class="dl-btn" id="dl-counts" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
-      Field counts <span class="dl-ext mono">.csv</span>
+      Combined counts <span class="dl-ext mono">.csv</span>
     </button>
   </div>
 
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
+      <div class="kpi-value mono">68</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">States represented</p>
       <div class="kpi-value mono">4</div>
     </div>
     <div class="kpi">
-      <p class="kpi-label">Counties / agencies represented</p>
-      <div class="kpi-value mono">4</div>
-    </div>
-    <div class="kpi">
-      <p class="kpi-label">Most-affected county</p>
-      <div class="kpi-value mono">1<span class="unit">&middot; tied, 4 counties</span></div>
+      <p class="kpi-label">Most-affected state</p>
+      <div class="kpi-value mono">33<span class="unit">&middot; Nebraska</span></div>
     </div>
   </div>
 
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is bucketed from current age, not age when reported missing &mdash; see the note on the age chart before comparing age ranges with Nebraska or South Dakota. BIA/tribal agencies (e.g. BIA Turtle Mountain Agency) would appear in the county field by agency name rather than a county, since no single county covers their jurisdiction. With only 4 records this week, every cell is small enough to be identifying &mdash; read accordingly.</p>
-    <p class="src">Source: North Dakota Missing Persons Search (missingpersons.nd.gov)</p>
+    <p class="note">Each state's total is its own weekly snapshot for the week of Sep 8, 2026, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age is kept as two separate groups rather than one: Nebraska and South Dakota report age when a person was reported missing, while Iowa and North Dakota expose only current age &mdash; stacking them as a single measure would misrepresent both. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
+    <p class="src">Sources: Nebraska State Patrol &middot; South Dakota Missing Persons Clearinghouse &middot; Iowa Missing Person Information Clearinghouse &middot; North Dakota Attorney General</p>
   </div>
 </div>
 
 <script>
-  var FIELDS = ['age_range', 'race', 'county', 'sex'];
-  var DATA = {
-    age_range: {
-      title: 'Cases by age (current age)',
-      caveat: 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.',
-      rows: [
-        { label: '10–19', count: 3 },
-        { label: '60–69', count: 1 }
-      ]
-    },
-    race: { title: 'Cases by race', rows: [
-      { label: 'White', count: 3 },
-      { label: 'American Indian', count: 1 }
-    ]},
-    county: { title: 'Cases by county', rows: [
-      { label: 'Burleigh', count: 1 },
-      { label: 'Cass', count: 1 },
-      { label: 'Morton', count: 1 },
-      { label: 'Stark', count: 1 }
-    ]},
-    sex: { title: 'Cases by sex', rows: [
-      { label: 'Female', count: 2 },
-      { label: 'Male', count: 2 }
-    ]}
-  };
-  var TOTAL = 4;
+  var STATE_DATA = [
+    { label: 'Nebraska', count: 33 },
+    { label: 'Iowa', count: 22 },
+    { label: 'South Dakota', count: 9 },
+    { label: 'North Dakota', count: 4 }
+  ];
+  var RACE_DATA = [
+    { label: 'White', count: 39 },
+    { label: 'Black', count: 19 },
+    { label: 'American Indian / Alaskan Native', count: 7 },
+    { label: 'Unknown', count: 2 },
+    { label: 'Asian / Pacific Islander', count: 1 }
+  ];
+  var SEX_DATA = [
+    { label: 'Female', count: 34 },
+    { label: 'Male', count: 34 }
+  ];
+  var AGE_REPORTED_DATA = [
+    { label: '10–19', count: 34 },
+    { label: '30–39', count: 3 },
+    { label: '20–29', count: 1 },
+    { label: '40–49', count: 1 },
+    { label: '50–59', count: 1 },
+    { label: '60–69', count: 1 },
+    { label: '70–79', count: 1 }
+  ];
+  var AGE_CURRENT_DATA = [
+    { label: '10–19', count: 20 },
+    { label: '40–49', count: 2 },
+    { label: '60–69', count: 2 },
+    { label: '30–39', count: 1 },
+    { label: '50–59', count: 1 }
+  ];
+  var AGE_REPORTED_TOTAL = 42;
+  var AGE_CURRENT_TOTAL = 26;
+  var TOTAL = 68;
 
-  var grid = document.getElementById('charts');
-
-  FIELDS.forEach(function (field) {
-    var group = DATA[field];
-    var rows = group.rows.slice().sort(function (a, b) { return b.count - a.count; });
-    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
-
-    var card = document.createElement('div');
-    card.className = 'card';
-
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = group.title;
-    var total = document.createElement('span');
-    total.className = 'card-total mono';
-    total.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(total);
-    card.appendChild(head);
-
-    if (group.caveat) {
-      var caveat = document.createElement('p');
-      caveat.className = 'card-caveat';
-      caveat.textContent = group.caveat;
-      card.appendChild(caveat);
-    } else {
-      var spacer = document.createElement('div');
-      spacer.className = 'card-note-spacer';
-      card.appendChild(spacer);
-    }
-
-    var bars = document.createElement('div');
-    bars.className = 'bars';
-
+  function buildBars(container, rows, total) {
     rows.forEach(function (r) {
-      var pct = Math.round((r.count / TOTAL) * 100);
-      var width = Math.round((r.count / max) * 100);
+      var pct = Math.round((r.count / total) * 100);
+      var width = Math.round((r.count / rows[0].count) * 100);
 
       var row = document.createElement('div');
       row.className = 'bar-row';
 
-      var label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = r.label;
+      var lbl = document.createElement('div');
+      lbl.className = 'bar-label';
+      lbl.textContent = r.label;
 
       var track = document.createElement('div');
       track.className = 'bar-track';
@@ -377,37 +375,129 @@
       value.className = 'bar-value mono';
       value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
 
-      row.appendChild(label);
+      row.appendChild(lbl);
       row.appendChild(track);
       row.appendChild(value);
-      bars.appendChild(row);
+      container.appendChild(row);
 
       requestAnimationFrame(function () {
         requestAnimationFrame(function () { fill.style.width = width + '%'; });
       });
     });
+  }
 
+  function buildCard(title, rows, total) {
+    var sorted = rows.slice().sort(function (a, b) { return b.count - a.count; });
+
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = title;
+    var totalEl = document.createElement('span');
+    totalEl.className = 'card-total mono';
+    totalEl.textContent = 'n = ' + total;
+    head.appendChild(h2);
+    head.appendChild(totalEl);
+    card.appendChild(head);
+
+    var spacer = document.createElement('div');
+    spacer.className = 'card-note-spacer';
+    card.appendChild(spacer);
+
+    var bars = document.createElement('div');
+    bars.className = 'bars';
+    buildBars(bars, sorted, total);
     card.appendChild(bars);
-    grid.appendChild(card);
-  });
 
-  var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,American Indian,Morton,Male\n" +
-    "10-19,White,Burleigh,Male\n" +
-    "10-19,White,Cass,Female\n" +
-    "60-69,White,Stark,Female\n";
+    return card;
+  }
 
-  var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,3\n" +
-    "age_range,60-69,1\n" +
-    "race,White,3\n" +
-    "race,American Indian,1\n" +
-    "county,Burleigh,1\n" +
-    "county,Cass,1\n" +
-    "county,Morton,1\n" +
-    "county,Stark,1\n" +
-    "sex,Female,2\n" +
-    "sex,Male,2\n";
+  function buildAgeCard() {
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = 'Cases by age';
+    var totalEl = document.createElement('span');
+    totalEl.className = 'card-total mono';
+    totalEl.textContent = 'n = ' + TOTAL;
+    head.appendChild(h2);
+    head.appendChild(totalEl);
+    card.appendChild(head);
+
+    var caveat = document.createElement('p');
+    caveat.className = 'card-caveat';
+    caveat.textContent = 'Nebraska and South Dakota report age when reported missing; Iowa and North Dakota expose only current age. Kept as separate groups rather than combined into one measure.';
+    card.appendChild(caveat);
+
+    var groups = [
+      { title: 'Age when reported · NE + SD', total: AGE_REPORTED_TOTAL, rows: AGE_REPORTED_DATA },
+      { title: 'Current age · IA + ND', total: AGE_CURRENT_TOTAL, rows: AGE_CURRENT_DATA }
+    ];
+
+    groups.forEach(function (g) {
+      var sub = document.createElement('div');
+      sub.className = 'age-subgroup';
+
+      var subHead = document.createElement('div');
+      subHead.className = 'age-subgroup-head';
+      var subTitle = document.createElement('span');
+      subTitle.className = 'age-subgroup-title';
+      subTitle.textContent = g.title;
+      var subN = document.createElement('span');
+      subN.className = 'age-subgroup-n mono';
+      subN.textContent = 'n = ' + g.total;
+      subHead.appendChild(subTitle);
+      subHead.appendChild(subN);
+      sub.appendChild(subHead);
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+      var sorted = g.rows.slice().sort(function (a, b) { return b.count - a.count; });
+      buildBars(bars, sorted, g.total);
+      sub.appendChild(bars);
+
+      card.appendChild(sub);
+    });
+
+    return card;
+  }
+
+  var grid = document.getElementById('charts');
+  grid.appendChild(buildCard('Cases by state', STATE_DATA, TOTAL));
+  grid.appendChild(buildAgeCard());
+  grid.appendChild(buildCard('Cases by race', RACE_DATA, TOTAL));
+  grid.appendChild(buildCard('Cases by sex', SEX_DATA, TOTAL));
+
+  var COMBINED_COUNTS_CSV = "state,field,value,count\n" +
+    "NE,total,open_cases,33\n" +
+    "SD,total,open_cases,9\n" +
+    "IA,total,open_cases,22\n" +
+    "ND,total,open_cases,4\n" +
+    "ALL,race,White,39\n" +
+    "ALL,race,Black,19\n" +
+    "ALL,race,American Indian / Alaskan Native,7\n" +
+    "ALL,race,Unknown,2\n" +
+    "ALL,race,Asian / Pacific Islander,1\n" +
+    "ALL,sex,Female,34\n" +
+    "ALL,sex,Male,34\n" +
+    "NE_SD,age_when_reported,10-19,34\n" +
+    "NE_SD,age_when_reported,20-29,1\n" +
+    "NE_SD,age_when_reported,30-39,3\n" +
+    "NE_SD,age_when_reported,40-49,1\n" +
+    "NE_SD,age_when_reported,50-59,1\n" +
+    "NE_SD,age_when_reported,60-69,1\n" +
+    "NE_SD,age_when_reported,70-79,1\n" +
+    "IA_ND,age_current,10-19,20\n" +
+    "IA_ND,age_current,30-39,1\n" +
+    "IA_ND,age_current,40-49,2\n" +
+    "IA_ND,age_current,50-59,1\n" +
+    "IA_ND,age_current,60-69,2\n";
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
@@ -422,11 +512,8 @@
       if (!downloads) return;
       var bar = document.getElementById('download-bar');
       bar.hidden = false;
-      document.getElementById('dl-raw').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_nd_week_of_2026-09-08.csv', RAW_CSV);
-      });
       document.getElementById('dl-counts').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_nd_week_of_2026-09-08_counts.csv', COUNTS_CSV);
+        saveCsv(downloads, 'missing_persons_combined_week_of_2026-09-08_counts.csv', COMBINED_COUNTS_CSV);
       });
     }).catch(function () {});
   })();
