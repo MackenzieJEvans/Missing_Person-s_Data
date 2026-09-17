@@ -468,7 +468,10 @@
     grid.innerHTML = '';
 
     FIELDS.forEach(function (field) {
-      var rows = data[field].slice().sort(function (a, b) { return b.count - a.count; });
+      var rows = data[field].slice().sort(function (a, b) {
+        if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
+        return b.count - a.count;
+      });
       var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
 
       var card = document.createElement('div');
