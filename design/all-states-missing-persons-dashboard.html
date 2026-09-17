@@ -311,20 +311,21 @@
   ];
   var AGE_DATA = [
     { label: '10–19', count: 54 },
+    { label: '20–29', count: 1 },
     { label: '30–39', count: 4 },
     { label: '40–49', count: 3 },
-    { label: '60–69', count: 3 },
     { label: '50–59', count: 2 },
-    { label: '20–29', count: 1 },
+    { label: '60–69', count: 3 },
     { label: '70–79', count: 1 }
   ];
   var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
   var TOTAL = 68;
 
   function buildBars(container, rows, total) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
     rows.forEach(function (r) {
       var pct = Math.round((r.count / total) * 100);
-      var width = Math.round((r.count / rows[0].count) * 100);
+      var width = Math.round((r.count / max) * 100);
 
       var row = document.createElement('div');
       row.className = 'bar-row';
@@ -354,8 +355,8 @@
     });
   }
 
-  function buildCard(title, rows, total, caveat) {
-    var sorted = rows.slice().sort(function (a, b) { return b.count - a.count; });
+  function buildCard(title, rows, total, caveat, keepOrder) {
+    var sorted = keepOrder ? rows.slice() : rows.slice().sort(function (a, b) { return b.count - a.count; });
 
     var card = document.createElement('div');
     card.className = 'card';
@@ -392,7 +393,7 @@
 
   var grid = document.getElementById('charts');
   grid.appendChild(buildCard('Cases by state', STATE_DATA, TOTAL));
-  grid.appendChild(buildCard('Cases by age', AGE_DATA, TOTAL, AGE_CAVEAT));
+  grid.appendChild(buildCard('Cases by age', AGE_DATA, TOTAL, AGE_CAVEAT, true));
   grid.appendChild(buildCard('Cases by race', RACE_DATA, TOTAL));
   grid.appendChild(buildCard('Cases by sex', SEX_DATA, TOTAL));
 
