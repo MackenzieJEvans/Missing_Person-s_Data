@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn5SNPC90ZXh0Pjwvc3ZnPg==">
+<title>South Dakota Missing Persons</title>
+<style>
+  :root {
+    --bg: oklch(13% 0.003 95);
+    --surface: oklch(17% 0.004 95);
+    --ink: oklch(88% 0.004 95);
+    --ink-strong: oklch(98% 0.002 95);
+    --line: oklch(27% 0.006 95);
+    --line-strong: oklch(36% 0.007 95);
+    --muted: oklch(63% 0.006 95);
+    --track: oklch(24% 0.006 95);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  .state-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .state-nav a, .state-nav span.active {
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .state-nav a { color: var(--muted); }
+  .state-nav a:hover { color: var(--ink); border-bottom-color: var(--line-strong); }
+  .state-nav span.active { color: var(--ink-strong); border-bottom-color: var(--ink-strong); }
+  .state-nav .state-sep { color: var(--line-strong); }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .dek {
+    margin: 0 0 24px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink);
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .meta .sep { color: var(--line-strong); }
+  .meta .dim { color: var(--muted); }
+
+  .downloads-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 18px;
+  }
+  .downloads-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 7px 12px 7px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .dl-btn:hover { border-color: var(--line-strong); color: var(--ink-strong); }
+  .dl-btn:hover svg { stroke: var(--ink-strong); }
+  .dl-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .dl-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--muted);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.15s ease;
+  }
+  .dl-ext { color: var(--muted); font-size: 11.5px; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0 0;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+  }
+  .kpi-label {
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .kpi-value {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink-strong);
+    line-height: 1;
+  }
+  .kpi-value .unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 24px;
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink-strong);
+  }
+  .card-head .card-total {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .bars { display: flex; flex-direction: column; gap: 13px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 80px; align-items: center; gap: 14px; }
+  .bar-label { font-size: 13.5px; text-align: right; color: var(--ink); overflow-wrap: anywhere; }
+  .bar-track { height: 22px; background: var(--track); position: relative; }
+  .bar-fill {
+    height: 100%;
+    background: var(--ink-strong);
+    width: 0%;
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-value { font-size: 13.5px; text-align: right; }
+  .bar-value .count { font-weight: 600; color: var(--ink-strong); }
+  .bar-value .pct { color: var(--muted); font-size: 11.5px; }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .foot p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .foot .note { max-width: 56ch; }
+  .foot .src { white-space: nowrap; text-align: right; }
+
+  @media (max-width: 640px) {
+    .kpis { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 96px 1fr 74px; gap: 10px; }
+    .bar-label { font-size: 12.5px; }
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <nav class="state-nav mono">
+    <a href="index.html">All</a>
+    <span class="state-sep">/</span>
+    <a href="nebraska.html">Nebraska</a>
+    <span class="state-sep">/</span>
+    <span class="active">South Dakota</span>
+    <span class="state-sep">/</span>
+    <a href="iowa.html">Iowa</a>
+    <span class="state-sep">/</span>
+    <a href="north-dakota.html">North Dakota</a>
+  </nav>
+
+  <p class="eyebrow mono">South Dakota Missing Persons Clearinghouse &middot; Public Safety Data</p>
+  <h1>Missing Persons Dashboard</h1>
+  <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
+  <div class="meta mono">
+    <span id="meta-week">Week of Sep 4, 2026</span>
+    <span class="sep">&middot;</span>
+    <span id="meta-cases">7 open cases</span>
+    <span class="sep">&middot;</span>
+    <span class="dim">missingpersons.sd.gov</span>
+  </div>
+
+  <div class="downloads-bar" id="download-bar">
+    <span class="downloads-label">Download data</span>
+    <button class="dl-btn" id="dl-raw" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+      Weekly records <span class="dl-ext mono">.csv</span>
+    </button>
+    <button class="dl-btn" id="dl-counts" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+      Field counts <span class="dl-ext mono">.csv</span>
+    </button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <p class="kpi-label">Open cases</p>
+      <div class="kpi-value mono" id="kpi-open">7</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Counties / agencies represented</p>
+      <div class="kpi-value mono" id="kpi-counties">4</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Most-affected area</p>
+      <div class="kpi-value mono" id="kpi-top">4<span class="unit">&middot; Pennington</span></div>
+    </div>
+  </div>
+
+  <div class="charts-grid" id="charts"></div>
+
+  <div class="foot">
+    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Tribal-jurisdiction agencies (e.g. Cheyenne River Sioux Tribal PD) appear in the county field by agency name, since they police reservations spanning multiple counties. South Dakota's weekly volume is small &mdash; nearly every cell is small enough to be identifying, in any week shown here &mdash; read accordingly.</p>
+    <p class="src">Source: South Dakota Missing Persons Clearinghouse (missingpersons.sd.gov)</p>
+  </div>
+</div>
+
+<script>
+  var FIELDS = ['age_range', 'race', 'county', 'sex'];
+  var FIELD_TITLES = {
+    age_range: 'Cases by age range',
+    race: 'Cases by race',
+    county: 'Cases by county',
+    sex: 'Cases by sex'
+  };
+
+  var WEEK_ORDER = ['2026-09-08', '2026-09-04'];
+
+  var WEEKS = {
+    '2026-09-04': {
+      shortLabel: 'Sep 4',
+      metaLabel: 'Week of Sep 4, 2026',
+      total: 7,
+      countiesRepresented: 4,
+      topArea: { label: 'Pennington', count: 4 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 5 },
+          { label: '20–29', count: 2 }
+        ],
+        race: [
+          { label: 'American Indian/Alaskan Native', count: 5 },
+          { label: 'White', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Pennington', count: 4 },
+          { label: 'Bon Homme', count: 1 },
+          { label: 'Minnehaha', count: 1 },
+          { label: 'Cheyenne River Sioux Tribal PD', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 4 },
+          { label: 'Female', count: 3 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-09-04.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-09-04_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Female\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,Unknown,Bon Homme,Male\n" +
+        "10-19,White,Minnehaha,Female\n" +
+        "20-29,American Indian/Alaskan Native,Cheyenne River Sioux Tribal PD,Female\n" +
+        "20-29,American Indian/Alaskan Native,Pennington,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,5\n" +
+        "age_range,20-29,2\n" +
+        "race,American Indian/Alaskan Native,5\n" +
+        "race,White,1\n" +
+        "race,Unknown,1\n" +
+        "county,Pennington,4\n" +
+        "county,Bon Homme,1\n" +
+        "county,Minnehaha,1\n" +
+        "county,Cheyenne River Sioux Tribal PD,1\n" +
+        "sex,Female,3\n" +
+        "sex,Male,4\n"
+    },
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      total: 9,
+      countiesRepresented: 6,
+      topArea: { label: 'Minnehaha', count: 4 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 9 }
+        ],
+        race: [
+          { label: 'White', count: 4 },
+          { label: 'American Indian/Alaskan Native', count: 2 },
+          { label: 'Black', count: 2 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Minnehaha', count: 4 },
+          { label: 'Bon Homme', count: 1 },
+          { label: 'Brown', count: 1 },
+          { label: 'Codington', count: 1 },
+          { label: 'Meade', count: 1 },
+          { label: 'Pennington', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 5 },
+          { label: 'Female', count: 4 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-09-08.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-09-08_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Brown,Female\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,Black,Minnehaha,Female\n" +
+        "10-19,Black,Minnehaha,Female\n" +
+        "10-19,Unknown,Bon Homme,Male\n" +
+        "10-19,White,Codington,Male\n" +
+        "10-19,White,Meade,Male\n" +
+        "10-19,White,Minnehaha,Female\n" +
+        "10-19,White,Minnehaha,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,9\n" +
+        "race,White,4\n" +
+        "race,American Indian/Alaskan Native,2\n" +
+        "race,Black,2\n" +
+        "race,Unknown,1\n" +
+        "county,Minnehaha,4\n" +
+        "county,Bon Homme,1\n" +
+        "county,Brown,1\n" +
+        "county,Codington,1\n" +
+        "county,Meade,1\n" +
+        "county,Pennington,1\n" +
+        "sex,Male,5\n" +
+        "sex,Female,4\n"
+    }
+  };
+
+  var currentWeek = WEEK_ORDER[0];
+
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
+  });
+
+  function buildCharts(data, total) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
+
+    FIELDS.forEach(function (field) {
+      var rows = data[field].slice().sort(function (a, b) {
+        if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
+        return b.count - a.count;
+      });
+      var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var head = document.createElement('div');
+      head.className = 'card-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = FIELD_TITLES[field];
+      var totalEl = document.createElement('span');
+      totalEl.className = 'card-total mono';
+      totalEl.textContent = 'n = ' + total;
+      head.appendChild(h2);
+      head.appendChild(totalEl);
+      card.appendChild(head);
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+
+      rows.forEach(function (r) {
+        var pct = Math.round((r.count / total) * 100);
+        var width = Math.round((r.count / max) * 100);
+
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'bar-label';
+        lbl.textContent = r.label;
+
+        var track = document.createElement('div');
+        track.className = 'bar-track';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        track.appendChild(fill);
+
+        var value = document.createElement('div');
+        value.className = 'bar-value mono';
+        value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(value);
+        bars.appendChild(row);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = width + '%'; });
+        });
+      });
+
+      card.appendChild(bars);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open cases';
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-counties').textContent = w.countiesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
+
+    buildCharts(w.data, w.total);
+  }
+
+  function saveCsv(filename, data) {
+    var blob = new Blob([data], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+  }
+
+  document.getElementById('dl-raw').addEventListener('click', function () {
+    var w = WEEKS[currentWeek];
+    saveCsv(w.rawFilename, w.rawCsv);
+  });
+  document.getElementById('dl-counts').addEventListener('click', function () {
+    var w = WEEKS[currentWeek];
+    saveCsv(w.countsFilename, w.countsCsv);
+  });
+
+  renderWeek(currentWeek);
+</script>
+</body>
+</html>

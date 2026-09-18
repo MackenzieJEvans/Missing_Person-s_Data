@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn5SNPC90ZXh0Pjwvc3ZnPg==">
+<title>All States Missing Persons</title>
+<style>
+  :root {
+    --bg: oklch(13% 0.003 95);
+    --surface: oklch(17% 0.004 95);
+    --ink: oklch(88% 0.004 95);
+    --ink-strong: oklch(98% 0.002 95);
+    --line: oklch(27% 0.006 95);
+    --line-strong: oklch(36% 0.007 95);
+    --muted: oklch(63% 0.006 95);
+    --track: oklch(24% 0.006 95);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  .state-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .state-nav a, .state-nav span.active {
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .state-nav a { color: var(--muted); }
+  .state-nav a:hover { color: var(--ink); border-bottom-color: var(--line-strong); }
+  .state-nav span.active { color: var(--ink-strong); border-bottom-color: var(--ink-strong); }
+  .state-nav .state-sep { color: var(--line-strong); }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .dek {
+    margin: 0 0 24px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 66ch;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink);
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .meta .sep { color: var(--line-strong); }
+  .meta .dim { color: var(--muted); }
+
+  .downloads-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 18px;
+  }
+  .downloads-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 7px 12px 7px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .dl-btn:hover { border-color: var(--line-strong); color: var(--ink-strong); }
+  .dl-btn:hover svg { stroke: var(--ink-strong); }
+  .dl-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .dl-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--muted);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.15s ease;
+  }
+  .dl-ext { color: var(--muted); font-size: 11.5px; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0 0;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+  }
+  .kpi-label {
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .kpi-value {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink-strong);
+    line-height: 1;
+  }
+  .kpi-value .unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 24px;
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink-strong);
+  }
+  .card-head .card-total {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .card-caveat {
+    margin: 0 0 18px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 50ch;
+  }
+  .card-note-spacer { margin-bottom: 20px; }
+
+  .bars { display: flex; flex-direction: column; gap: 13px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 80px; align-items: center; gap: 14px; }
+  .bar-label { font-size: 13.5px; text-align: right; color: var(--ink); overflow-wrap: anywhere; }
+  .bar-track { height: 22px; background: var(--track); position: relative; }
+  .bar-fill {
+    height: 100%;
+    background: var(--ink-strong);
+    width: 0%;
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-value { font-size: 13.5px; text-align: right; }
+  .bar-value .count { font-weight: 600; color: var(--ink-strong); }
+  .bar-value .pct { color: var(--muted); font-size: 11.5px; }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .foot p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .foot .note { max-width: 60ch; }
+  .foot .src { text-align: right; max-width: 32ch; }
+
+  @media (max-width: 640px) {
+    .kpis { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 96px 1fr 74px; gap: 10px; }
+    .bar-label { font-size: 12.5px; }
+    .foot .src { text-align: left; max-width: none; }
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <nav class="state-nav mono">
+    <span class="active">All</span>
+    <span class="state-sep">/</span>
+    <a href="nebraska.html">Nebraska</a>
+    <span class="state-sep">/</span>
+    <a href="south-dakota.html">South Dakota</a>
+    <span class="state-sep">/</span>
+    <a href="iowa.html">Iowa</a>
+    <span class="state-sep">/</span>
+    <a href="north-dakota.html">North Dakota</a>
+  </nav>
+
+  <p class="eyebrow mono">Nebraska &middot; South Dakota &middot; Iowa &middot; North Dakota</p>
+  <h1>Missing Persons Dashboard</h1>
+  <p class="dek">Combined unresolved missing-persons cases across all four states for the week of Sep 8, 2026 &mdash; the most recent week common to every state page. See each state's own page for county-level detail and, for Nebraska and South Dakota, an earlier week.</p>
+  <div class="meta mono">
+    <span>Week of Sep 8, 2026</span>
+    <span class="sep">&middot;</span>
+    <span>68 open cases</span>
+    <span class="sep">&middot;</span>
+    <span class="dim">4 states combined</span>
+  </div>
+
+  <div class="downloads-bar" id="download-bar">
+    <span class="downloads-label">Download data</span>
+    <button class="dl-btn" id="dl-counts" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>
+      Combined counts <span class="dl-ext mono">.csv</span>
+    </button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <p class="kpi-label">Open cases</p>
+      <div class="kpi-value mono">68</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">States represented</p>
+      <div class="kpi-value mono">4</div>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Most-affected state</p>
+      <div class="kpi-value mono">33<span class="unit">&middot; Nebraska</span></div>
+    </div>
+  </div>
+
+  <div class="charts-grid" id="charts"></div>
+
+  <div class="foot">
+    <p class="note">Each state's total is its own weekly snapshot for the week of Sep 8, 2026, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age combines Nebraska's and South Dakota's age when reported missing with Iowa's and North Dakota's current age &mdash; for a single week's snapshot these nearly coincide, but they aren't strictly the same measure; see each state's own page if that distinction matters for your use. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
+    <p class="src">Sources: Nebraska State Patrol &middot; South Dakota Missing Persons Clearinghouse &middot; Iowa Missing Person Information Clearinghouse &middot; North Dakota Attorney General</p>
+  </div>
+</div>
+
+<script>
+  var STATE_DATA = [
+    { label: 'Nebraska', count: 33 },
+    { label: 'Iowa', count: 22 },
+    { label: 'South Dakota', count: 9 },
+    { label: 'North Dakota', count: 4 }
+  ];
+  var RACE_DATA = [
+    { label: 'White', count: 39 },
+    { label: 'Black', count: 19 },
+    { label: 'American Indian / Alaskan Native', count: 7 },
+    { label: 'Unknown', count: 2 },
+    { label: 'Asian / Pacific Islander', count: 1 }
+  ];
+  var SEX_DATA = [
+    { label: 'Female', count: 34 },
+    { label: 'Male', count: 34 }
+  ];
+  var AGE_DATA = [
+    { label: '10–19', count: 54 },
+    { label: '20–29', count: 1 },
+    { label: '30–39', count: 4 },
+    { label: '40–49', count: 3 },
+    { label: '50–59', count: 2 },
+    { label: '60–69', count: 3 },
+    { label: '70–79', count: 1 }
+  ];
+  var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
+  var TOTAL = 68;
+
+  function buildBars(container, rows, total) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+    rows.forEach(function (r) {
+      var pct = Math.round((r.count / total) * 100);
+      var width = Math.round((r.count / max) * 100);
+
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+
+      var lbl = document.createElement('div');
+      lbl.className = 'bar-label';
+      lbl.textContent = r.label;
+
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      track.appendChild(fill);
+
+      var value = document.createElement('div');
+      value.className = 'bar-value mono';
+      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+      row.appendChild(lbl);
+      row.appendChild(track);
+      row.appendChild(value);
+      container.appendChild(row);
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { fill.style.width = width + '%'; });
+      });
+    });
+  }
+
+  function buildCard(title, rows, total, caveat, keepOrder) {
+    var sorted = keepOrder ? rows.slice() : rows.slice().sort(function (a, b) { return b.count - a.count; });
+
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = title;
+    var totalEl = document.createElement('span');
+    totalEl.className = 'card-total mono';
+    totalEl.textContent = 'n = ' + total;
+    head.appendChild(h2);
+    head.appendChild(totalEl);
+    card.appendChild(head);
+
+    if (caveat) {
+      var caveatEl = document.createElement('p');
+      caveatEl.className = 'card-caveat';
+      caveatEl.textContent = caveat;
+      card.appendChild(caveatEl);
+    } else {
+      var spacer = document.createElement('div');
+      spacer.className = 'card-note-spacer';
+      card.appendChild(spacer);
+    }
+
+    var bars = document.createElement('div');
+    bars.className = 'bars';
+    buildBars(bars, sorted, total);
+    card.appendChild(bars);
+
+    return card;
+  }
+
+  var grid = document.getElementById('charts');
+  grid.appendChild(buildCard('Cases by state', STATE_DATA, TOTAL));
+  grid.appendChild(buildCard('Cases by age', AGE_DATA, TOTAL, AGE_CAVEAT, true));
+  grid.appendChild(buildCard('Cases by race', RACE_DATA, TOTAL));
+  grid.appendChild(buildCard('Cases by sex', SEX_DATA, TOTAL));
+
+  var COMBINED_COUNTS_CSV = "state,field,value,count\n" +
+    "NE,total,open_cases,33\n" +
+    "SD,total,open_cases,9\n" +
+    "IA,total,open_cases,22\n" +
+    "ND,total,open_cases,4\n" +
+    "ALL,race,White,39\n" +
+    "ALL,race,Black,19\n" +
+    "ALL,race,American Indian / Alaskan Native,7\n" +
+    "ALL,race,Unknown,2\n" +
+    "ALL,race,Asian / Pacific Islander,1\n" +
+    "ALL,sex,Female,34\n" +
+    "ALL,sex,Male,34\n" +
+    "ALL,age_range,10-19,54\n" +
+    "ALL,age_range,20-29,1\n" +
+    "ALL,age_range,30-39,4\n" +
+    "ALL,age_range,40-49,3\n" +
+    "ALL,age_range,50-59,2\n" +
+    "ALL,age_range,60-69,3\n" +
+    "ALL,age_range,70-79,1\n";
+
+  function saveCsv(filename, data) {
+    var blob = new Blob([data], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+  }
+
+  document.getElementById('dl-counts').addEventListener('click', function () {
+    saveCsv('missing_persons_combined_week_of_2026-09-08_counts.csv', COMBINED_COUNTS_CSV);
+  });
+</script>
+</body>
+</html>
