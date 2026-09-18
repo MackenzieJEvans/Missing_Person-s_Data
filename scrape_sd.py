@@ -194,6 +194,26 @@ def write_csv(records: list[dict], columns: list[str]) -> Path:
     return path
 
 
+def write_counts_csv(records: list[dict], columns: list[str]) -> Path:
+    """One row per (field, value) with how many people fall in it - e.g. how
+    many 10-19s, how many from Pennington. Long format so a chart tool can
+    filter by `field` instead of needing one column per dimension. Counted
+    straight from the same records write_csv() emits, so the two files
+    always agree."""
+    from collections import Counter
+    cutoff = dt.date.today() - dt.timedelta(days=WINDOW_DAYS)
+    path = PROJECT_DIR / f"missing_persons_sd_week_of_{cutoff.isoformat()}_counts.csv"
+    with path.open("w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["field", "value", "count"])
+        for field in columns:
+            counts = Counter(r[field] for r in records)
+            for value, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+                w.writerow([field, value, n])
+    print(f"wrote {path.name}: counts for {columns}")
+    return path
+
+
 def scrape_from(rows: list[dict], mapping: dict[str, str]) -> list[dict]:
     cutoff = dt.date.today() - dt.timedelta(days=WINDOW_DAYS)
     in_window, skipped = [], 0
@@ -286,6 +306,7 @@ def main() -> None:
         print("\n--dry-run: no CSV written")
         return
     write_csv(records, OUTPUT_COLUMNS)
+    write_counts_csv(records, OUTPUT_COLUMNS)
 
 
 if __name__ == "__main__":
