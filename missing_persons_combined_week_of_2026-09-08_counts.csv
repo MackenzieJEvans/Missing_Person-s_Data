@@ -1,0 +1,19 @@
+state,field,value,count
+NE,total,open_cases,33
+SD,total,open_cases,9
+IA,total,open_cases,22
+ND,total,open_cases,4
+ALL,race,White,39
+ALL,race,Black,19
+ALL,race,American Indian / Alaskan Native,7
+ALL,race,Unknown,2
+ALL,race,Asian / Pacific Islander,1
+ALL,sex,Female,34
+ALL,sex,Male,34
+ALL,age_range,10-19,54
+ALL,age_range,20-29,1
+ALL,age_range,30-39,4
+ALL,age_range,40-49,3
+ALL,age_range,50-59,2
+ALL,age_range,60-69,3
+ALL,age_range,70-79,1
