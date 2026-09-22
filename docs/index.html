@@ -72,6 +72,42 @@
     color: var(--muted);
     max-width: 66ch;
   }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -257,11 +293,14 @@
 
   <p class="eyebrow mono">Nebraska &middot; South Dakota &middot; Iowa &middot; North Dakota</p>
   <h1>Missing Persons Dashboard</h1>
-  <p class="dek">Combined unresolved missing-persons cases across all four states for the week of Sep 15, 2026 &mdash; the most recent week common to every state page. See each state's own page for county-level detail and earlier weeks.</p>
+  <p class="dek">Combined unresolved missing-persons cases across all four states for the selected week. See each state's own page for county-level detail and additional weeks.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
   <div class="meta mono">
-    <span>Week of Sep 15, 2026</span>
+    <span id="meta-week">Week of Sep 15, 2026</span>
     <span class="sep">&middot;</span>
-    <span>55 open cases</span>
+    <span id="meta-cases">55 open cases</span>
     <span class="sep">&middot;</span>
     <span class="dim">4 states combined</span>
   </div>
@@ -277,52 +316,153 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">55</div>
+      <div class="kpi-value mono" id="kpi-open">55</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">States represented</p>
-      <div class="kpi-value mono">4</div>
+      <div class="kpi-value mono" id="kpi-states">4</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected state</p>
-      <div class="kpi-value mono">31<span class="unit">&middot; Nebraska</span></div>
+      <div class="kpi-value mono" id="kpi-top">31<span class="unit">&middot; Nebraska</span></div>
     </div>
   </div>
 
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Each state's total is its own weekly snapshot for the week of Sep 15, 2026, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age combines Nebraska's and South Dakota's age when reported missing with Iowa's and North Dakota's current age &mdash; for a single week's snapshot these nearly coincide, but they aren't strictly the same measure; see each state's own page if that distinction matters for your use. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
+    <p class="note">Each state's total is its own weekly snapshot <span id="foot-week-phrase">for the week of Sep 15, 2026</span>, so this combines four independent counts rather than one shared measure. Race and sex are normalized across states' differing source wording (e.g. Nebraska's &ldquo;American Indian Or Alaskan Native,&rdquo; South Dakota's &ldquo;American Indian/Alaskan Native,&rdquo; and North Dakota's &ldquo;American Indian&rdquo; are combined into one category here). Age combines Nebraska's and South Dakota's age when reported missing with Iowa's and North Dakota's current age &mdash; for a single week's snapshot these nearly coincide, but they aren't strictly the same measure; see each state's own page if that distinction matters for your use. County-level detail isn't combined here, since county names repeat across states and South Dakota/North Dakota use tribal-agency names in that field &mdash; see each state's own page.</p>
     <p class="src">Sources: Nebraska State Patrol &middot; South Dakota Missing Persons Clearinghouse &middot; Iowa Missing Person Information Clearinghouse &middot; North Dakota Attorney General</p>
   </div>
 </div>
 
 <script>
-  var STATE_DATA = [
-    { label: 'Nebraska', count: 31 },
-    { label: 'Iowa', count: 16 },
-    { label: 'South Dakota', count: 7 },
-    { label: 'North Dakota', count: 1 }
-  ];
-  var RACE_DATA = [
-    { label: 'Black', count: 24 },
-    { label: 'White', count: 23 },
-    { label: 'American Indian / Alaskan Native', count: 4 },
-    { label: 'Asian / Pacific Islander', count: 2 },
-    { label: 'Unknown', count: 2 }
-  ];
-  var SEX_DATA = [
-    { label: 'Female', count: 33 },
-    { label: 'Male', count: 22 }
-  ];
-  var AGE_DATA = [
-    { label: '10–19', count: 50 },
-    { label: '20–29', count: 2 },
-    { label: '30–39', count: 1 },
-    { label: '40–49', count: 2 }
-  ];
   var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
-  var TOTAL = 55;
+
+  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
+
+  var WEEKS = {
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      weekPhrase: 'for the week of Sep 8, 2026',
+      total: 68,
+      statesRepresented: 4,
+      topState: { label: 'Nebraska', count: 33 },
+      stateData: [
+        { label: 'Nebraska', count: 33 },
+        { label: 'Iowa', count: 22 },
+        { label: 'South Dakota', count: 9 },
+        { label: 'North Dakota', count: 4 }
+      ],
+      raceData: [
+        { label: 'White', count: 39 },
+        { label: 'Black', count: 19 },
+        { label: 'American Indian / Alaskan Native', count: 7 },
+        { label: 'Unknown', count: 2 },
+        { label: 'Asian / Pacific Islander', count: 1 }
+      ],
+      sexData: [
+        { label: 'Female', count: 34 },
+        { label: 'Male', count: 34 }
+      ],
+      ageData: [
+        { label: '10–19', count: 54 },
+        { label: '20–29', count: 1 },
+        { label: '30–39', count: 4 },
+        { label: '40–49', count: 3 },
+        { label: '50–59', count: 2 },
+        { label: '60–69', count: 3 },
+        { label: '70–79', count: 1 }
+      ],
+      countsFilename: 'missing_persons_combined_week_of_2026-09-08_counts.csv',
+      countsCsv: "state,field,value,count\n" +
+        "NE,total,open_cases,33\n" +
+        "SD,total,open_cases,9\n" +
+        "IA,total,open_cases,22\n" +
+        "ND,total,open_cases,4\n" +
+        "ALL,race,White,39\n" +
+        "ALL,race,Black,19\n" +
+        "ALL,race,American Indian / Alaskan Native,7\n" +
+        "ALL,race,Unknown,2\n" +
+        "ALL,race,Asian / Pacific Islander,1\n" +
+        "ALL,sex,Female,34\n" +
+        "ALL,sex,Male,34\n" +
+        "ALL,age_range,10-19,54\n" +
+        "ALL,age_range,20-29,1\n" +
+        "ALL,age_range,30-39,4\n" +
+        "ALL,age_range,40-49,3\n" +
+        "ALL,age_range,50-59,2\n" +
+        "ALL,age_range,60-69,3\n" +
+        "ALL,age_range,70-79,1\n"
+    },
+    '2026-09-15': {
+      shortLabel: 'Sep 15',
+      metaLabel: 'Week of Sep 15, 2026',
+      weekPhrase: 'for the week of Sep 15, 2026',
+      total: 55,
+      statesRepresented: 4,
+      topState: { label: 'Nebraska', count: 31 },
+      stateData: [
+        { label: 'Nebraska', count: 31 },
+        { label: 'Iowa', count: 16 },
+        { label: 'South Dakota', count: 7 },
+        { label: 'North Dakota', count: 1 }
+      ],
+      raceData: [
+        { label: 'Black', count: 24 },
+        { label: 'White', count: 23 },
+        { label: 'American Indian / Alaskan Native', count: 4 },
+        { label: 'Asian / Pacific Islander', count: 2 },
+        { label: 'Unknown', count: 2 }
+      ],
+      sexData: [
+        { label: 'Female', count: 33 },
+        { label: 'Male', count: 22 }
+      ],
+      ageData: [
+        { label: '10–19', count: 50 },
+        { label: '20–29', count: 2 },
+        { label: '30–39', count: 1 },
+        { label: '40–49', count: 2 }
+      ],
+      countsFilename: 'missing_persons_combined_week_of_2026-09-15_counts.csv',
+      countsCsv: "state,field,value,count\n" +
+        "NE,total,open_cases,31\n" +
+        "SD,total,open_cases,7\n" +
+        "IA,total,open_cases,16\n" +
+        "ND,total,open_cases,1\n" +
+        "ALL,race,Black,24\n" +
+        "ALL,race,White,23\n" +
+        "ALL,race,American Indian / Alaskan Native,4\n" +
+        "ALL,race,Asian / Pacific Islander,2\n" +
+        "ALL,race,Unknown,2\n" +
+        "ALL,sex,Female,33\n" +
+        "ALL,sex,Male,22\n" +
+        "ALL,age_range,10-19,50\n" +
+        "ALL,age_range,20-29,2\n" +
+        "ALL,age_range,30-39,1\n" +
+        "ALL,age_range,40-49,2\n"
+    }
+  };
+
+  var currentWeek = WEEK_ORDER[0];
+
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
+  });
 
   function buildBars(container, rows, total) {
     var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
@@ -394,28 +534,32 @@
     return card;
   }
 
-  var grid = document.getElementById('charts');
-  grid.appendChild(buildCard('Cases by state', STATE_DATA, TOTAL));
-  grid.appendChild(buildCard('Cases by age', AGE_DATA, TOTAL, AGE_CAVEAT, true));
-  grid.appendChild(buildCard('Cases by race', RACE_DATA, TOTAL));
-  grid.appendChild(buildCard('Cases by sex', SEX_DATA, TOTAL));
+  function buildCharts(w) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
+    grid.appendChild(buildCard('Cases by state', w.stateData, w.total));
+    grid.appendChild(buildCard('Cases by age', w.ageData, w.total, AGE_CAVEAT, true));
+    grid.appendChild(buildCard('Cases by race', w.raceData, w.total));
+    grid.appendChild(buildCard('Cases by sex', w.sexData, w.total));
+  }
 
-  var COMBINED_COUNTS_CSV = "state,field,value,count\n" +
-    "NE,total,open_cases,31\n" +
-    "SD,total,open_cases,7\n" +
-    "IA,total,open_cases,16\n" +
-    "ND,total,open_cases,1\n" +
-    "ALL,race,Black,24\n" +
-    "ALL,race,White,23\n" +
-    "ALL,race,American Indian / Alaskan Native,4\n" +
-    "ALL,race,Asian / Pacific Islander,2\n" +
-    "ALL,race,Unknown,2\n" +
-    "ALL,sex,Female,33\n" +
-    "ALL,sex,Male,22\n" +
-    "ALL,age_range,10-19,50\n" +
-    "ALL,age_range,20-29,2\n" +
-    "ALL,age_range,30-39,1\n" +
-    "ALL,age_range,40-49,2\n";
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-states').textContent = w.statesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topState.count + '<span class="unit">&middot; ' + w.topState.label + '</span>';
+    document.getElementById('foot-week-phrase').textContent = w.weekPhrase;
+
+    buildCharts(w);
+  }
 
   function saveCsv(filename, data) {
     var blob = new Blob([data], { type: 'text/csv;charset=utf-8' });
@@ -430,8 +574,11 @@
   }
 
   document.getElementById('dl-counts').addEventListener('click', function () {
-    saveCsv('missing_persons_combined_week_of_2026-09-15_counts.csv', COMBINED_COUNTS_CSV);
+    var w = WEEKS[currentWeek];
+    saveCsv(w.countsFilename, w.countsCsv);
   });
+
+  renderWeek(currentWeek);
 </script>
 </body>
 </html>
