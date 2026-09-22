@@ -71,6 +71,42 @@
     color: var(--muted);
     max-width: 62ch;
   }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -256,10 +292,13 @@
   <p class="eyebrow mono">Iowa Missing Person Information Clearinghouse &middot; Public Safety Data</p>
   <h1>Missing Persons Dashboard</h1>
   <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
   <div class="meta mono">
-    <span>Week of Sep 8, 2026</span>
+    <span id="meta-week">Week of Sep 8, 2026</span>
     <span class="sep">&middot;</span>
-    <span>22 open cases</span>
+    <span id="meta-cases">22 open cases</span>
     <span class="sep">&middot;</span>
     <span class="dim">missingpersons.iowa.gov</span>
   </div>
@@ -279,15 +318,15 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">22</div>
+      <div class="kpi-value mono" id="kpi-open">22</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Counties represented</p>
-      <div class="kpi-value mono">7</div>
+      <div class="kpi-value mono" id="kpi-counties">7</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected county</p>
-      <div class="kpi-value mono">10<span class="unit">&middot; Polk Co.</span></div>
+      <div class="kpi-value mono" id="kpi-top">10<span class="unit">&middot; Polk Co.</span></div>
     </div>
   </div>
 
@@ -301,152 +340,268 @@
 
 <script>
   var FIELDS = ['age_range', 'race', 'county', 'sex'];
-  var DATA = {
-    age_range: {
-      title: 'Cases by age (current age)',
-      caveat: 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.',
-      rows: [
-        { label: '10–19', count: 17 },
-        { label: '30–39', count: 1 },
-        { label: '40–49', count: 2 },
-        { label: '50–59', count: 1 },
-        { label: '60–69', count: 1 }
-      ]
-    },
-    race: { title: 'Cases by race', rows: [
-      { label: 'White', count: 14 },
-      { label: 'Black', count: 8 }
-    ]},
-    county: { title: 'Cases by county', rows: [
-      { label: 'Polk', count: 10 },
-      { label: 'Scott', count: 3 },
-      { label: 'Woodbury', count: 3 },
-      { label: 'Black Hawk', count: 2 },
-      { label: 'Linn', count: 2 },
-      { label: 'Dallas', count: 1 },
-      { label: 'Webster', count: 1 }
-    ]},
-    sex: { title: 'Cases by sex', rows: [
-      { label: 'Female', count: 11 },
-      { label: 'Male', count: 11 }
-    ]}
+  var FIELD_TITLES = {
+    age_range: 'Cases by age (current age)',
+    race: 'Cases by race',
+    county: 'Cases by county',
+    sex: 'Cases by sex'
   };
-  var TOTAL = 22;
+  var AGE_CAVEAT = 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.';
 
-  var grid = document.getElementById('charts');
+  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
 
-  FIELDS.forEach(function (field) {
-    var group = DATA[field];
-    var rows = group.rows.slice().sort(function (a, b) {
-      if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
-      return b.count - a.count;
-    });
-    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
-
-    var card = document.createElement('div');
-    card.className = 'card';
-
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = group.title;
-    var total = document.createElement('span');
-    total.className = 'card-total mono';
-    total.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(total);
-    card.appendChild(head);
-
-    if (group.caveat) {
-      var caveat = document.createElement('p');
-      caveat.className = 'card-caveat';
-      caveat.textContent = group.caveat;
-      card.appendChild(caveat);
-    } else {
-      var spacer = document.createElement('div');
-      spacer.className = 'card-note-spacer';
-      card.appendChild(spacer);
+  var WEEKS = {
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      total: 22,
+      countiesRepresented: 7,
+      topArea: { label: 'Polk Co.', count: 10 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 17 },
+          { label: '30–39', count: 1 },
+          { label: '40–49', count: 2 },
+          { label: '50–59', count: 1 },
+          { label: '60–69', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 14 },
+          { label: 'Black', count: 8 }
+        ],
+        county: [
+          { label: 'Polk', count: 10 },
+          { label: 'Scott', count: 3 },
+          { label: 'Woodbury', count: 3 },
+          { label: 'Black Hawk', count: 2 },
+          { label: 'Linn', count: 2 },
+          { label: 'Dallas', count: 1 },
+          { label: 'Webster', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 11 },
+          { label: 'Male', count: 11 }
+        ]
+      },
+      rawFilename: 'missing_persons_ia_week_of_2026-09-08.csv',
+      countsFilename: 'missing_persons_ia_week_of_2026-09-08_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Black,Black Hawk,Female\n" +
+        "10-19,Black,Dallas,Female\n" +
+        "10-19,Black,Polk,Female\n" +
+        "10-19,Black,Polk,Male\n" +
+        "10-19,Black,Woodbury,Male\n" +
+        "10-19,White,Linn,Female\n" +
+        "10-19,White,Linn,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Male\n" +
+        "10-19,White,Polk,Male\n" +
+        "10-19,White,Scott,Female\n" +
+        "10-19,White,Scott,Male\n" +
+        "10-19,White,Woodbury,Male\n" +
+        "10-19,White,Woodbury,Male\n" +
+        "30-39,Black,Scott,Male\n" +
+        "40-49,Black,Polk,Male\n" +
+        "40-49,White,Webster,Male\n" +
+        "50-59,White,Black Hawk,Male\n" +
+        "60-69,Black,Polk,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,17\n" +
+        "age_range,40-49,2\n" +
+        "age_range,30-39,1\n" +
+        "age_range,50-59,1\n" +
+        "age_range,60-69,1\n" +
+        "race,White,14\n" +
+        "race,Black,8\n" +
+        "county,Polk,10\n" +
+        "county,Scott,3\n" +
+        "county,Woodbury,3\n" +
+        "county,Black Hawk,2\n" +
+        "county,Linn,2\n" +
+        "county,Dallas,1\n" +
+        "county,Webster,1\n" +
+        "sex,Female,11\n" +
+        "sex,Male,11\n"
+    },
+    '2026-09-15': {
+      shortLabel: 'Sep 15',
+      metaLabel: 'Week of Sep 15, 2026',
+      total: 16,
+      countiesRepresented: 7,
+      topArea: { label: 'Polk Co.', count: 6 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 15 },
+          { label: '20–29', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 10 },
+          { label: 'Black', count: 5 },
+          { label: 'Asian / Pacific Islander', count: 1 }
+        ],
+        county: [
+          { label: 'Polk', count: 6 },
+          { label: 'Scott', count: 3 },
+          { label: 'Linn', count: 2 },
+          { label: 'Unknown', count: 2 },
+          { label: 'Appanoose', count: 1 },
+          { label: 'Jackson', count: 1 },
+          { label: 'Johnson', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 9 },
+          { label: 'Male', count: 7 }
+        ]
+      },
+      rawFilename: 'missing_persons_ia_week_of_2026-09-15.csv',
+      countsFilename: 'missing_persons_ia_week_of_2026-09-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Asian or Pacific Islander,Polk,Male\n" +
+        "10-19,Black,Linn,Male\n" +
+        "10-19,Black,Linn,Male\n" +
+        "10-19,Black,Polk,Female\n" +
+        "10-19,Black,Scott,Female\n" +
+        "10-19,White,Appanoose,Female\n" +
+        "10-19,White,Jackson,Male\n" +
+        "10-19,White,Johnson,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Polk,Male\n" +
+        "10-19,White,Scott,Female\n" +
+        "10-19,White,Scott,Male\n" +
+        "10-19,White,Unknown,Female\n" +
+        "10-19,White,Unknown,Male\n" +
+        "20-29,Black,Polk,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,15\n" +
+        "age_range,20-29,1\n" +
+        "race,White,10\n" +
+        "race,Black,5\n" +
+        "race,Asian or Pacific Islander,1\n" +
+        "county,Polk,6\n" +
+        "county,Scott,3\n" +
+        "county,Linn,2\n" +
+        "county,Unknown,2\n" +
+        "county,Appanoose,1\n" +
+        "county,Jackson,1\n" +
+        "county,Johnson,1\n" +
+        "sex,Female,9\n" +
+        "sex,Male,7\n"
     }
+  };
 
-    var bars = document.createElement('div');
-    bars.className = 'bars';
+  var currentWeek = WEEK_ORDER[0];
 
-    rows.forEach(function (r) {
-      var pct = Math.round((r.count / TOTAL) * 100);
-      var width = Math.round((r.count / max) * 100);
-
-      var row = document.createElement('div');
-      row.className = 'bar-row';
-
-      var label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = r.label;
-
-      var track = document.createElement('div');
-      track.className = 'bar-track';
-      var fill = document.createElement('div');
-      fill.className = 'bar-fill';
-      track.appendChild(fill);
-
-      var value = document.createElement('div');
-      value.className = 'bar-value mono';
-      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
-
-      row.appendChild(label);
-      row.appendChild(track);
-      row.appendChild(value);
-      bars.appendChild(row);
-
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { fill.style.width = width + '%'; });
-      });
-    });
-
-    card.appendChild(bars);
-    grid.appendChild(card);
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
   });
 
-  var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,Black,Black Hawk,Female\n" +
-    "10-19,Black,Dallas,Female\n" +
-    "10-19,Black,Polk,Female\n" +
-    "10-19,Black,Polk,Male\n" +
-    "10-19,Black,Woodbury,Male\n" +
-    "10-19,White,Linn,Female\n" +
-    "10-19,White,Linn,Female\n" +
-    "10-19,White,Polk,Female\n" +
-    "10-19,White,Polk,Female\n" +
-    "10-19,White,Polk,Female\n" +
-    "10-19,White,Polk,Female\n" +
-    "10-19,White,Polk,Male\n" +
-    "10-19,White,Polk,Male\n" +
-    "10-19,White,Scott,Female\n" +
-    "10-19,White,Scott,Male\n" +
-    "10-19,White,Woodbury,Male\n" +
-    "10-19,White,Woodbury,Male\n" +
-    "30-39,Black,Scott,Male\n" +
-    "40-49,Black,Polk,Male\n" +
-    "40-49,White,Webster,Male\n" +
-    "50-59,White,Black Hawk,Male\n" +
-    "60-69,Black,Polk,Female\n";
+  function buildCharts(data, total) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
 
-  var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,17\n" +
-    "age_range,40-49,2\n" +
-    "age_range,30-39,1\n" +
-    "age_range,50-59,1\n" +
-    "age_range,60-69,1\n" +
-    "race,White,14\n" +
-    "race,Black,8\n" +
-    "county,Polk,10\n" +
-    "county,Scott,3\n" +
-    "county,Woodbury,3\n" +
-    "county,Black Hawk,2\n" +
-    "county,Linn,2\n" +
-    "county,Dallas,1\n" +
-    "county,Webster,1\n" +
-    "sex,Female,11\n" +
-    "sex,Male,11\n";
+    FIELDS.forEach(function (field) {
+      var rows = data[field].slice().sort(function (a, b) {
+        if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
+        return b.count - a.count;
+      });
+      var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var head = document.createElement('div');
+      head.className = 'card-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = FIELD_TITLES[field];
+      var totalEl = document.createElement('span');
+      totalEl.className = 'card-total mono';
+      totalEl.textContent = 'n = ' + total;
+      head.appendChild(h2);
+      head.appendChild(totalEl);
+      card.appendChild(head);
+
+      if (field === 'age_range') {
+        var caveat = document.createElement('p');
+        caveat.className = 'card-caveat';
+        caveat.textContent = AGE_CAVEAT;
+        card.appendChild(caveat);
+      } else {
+        var spacer = document.createElement('div');
+        spacer.className = 'card-note-spacer';
+        card.appendChild(spacer);
+      }
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+
+      rows.forEach(function (r) {
+        var pct = Math.round((r.count / total) * 100);
+        var width = Math.round((r.count / max) * 100);
+
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'bar-label';
+        lbl.textContent = r.label;
+
+        var track = document.createElement('div');
+        track.className = 'bar-track';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        track.appendChild(fill);
+
+        var value = document.createElement('div');
+        value.className = 'bar-value mono';
+        value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(value);
+        bars.appendChild(row);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = width + '%'; });
+        });
+      });
+
+      card.appendChild(bars);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-counties').textContent = w.countiesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
+
+    buildCharts(w.data, w.total);
+  }
 
   function saveCsv(filename, data) {
     var blob = new Blob([data], { type: 'text/csv;charset=utf-8' });
@@ -461,11 +616,15 @@
   }
 
   document.getElementById('dl-raw').addEventListener('click', function () {
-    saveCsv('missing_persons_ia_week_of_2026-09-08.csv', RAW_CSV);
+    var w = WEEKS[currentWeek];
+    saveCsv(w.rawFilename, w.rawCsv);
   });
   document.getElementById('dl-counts').addEventListener('click', function () {
-    saveCsv('missing_persons_ia_week_of_2026-09-08_counts.csv', COUNTS_CSV);
+    var w = WEEKS[currentWeek];
+    saveCsv(w.countsFilename, w.countsCsv);
   });
+
+  renderWeek(currentWeek);
 </script>
 </body>
 </html>

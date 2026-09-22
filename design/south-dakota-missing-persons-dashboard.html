@@ -333,9 +333,61 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-09-08', '2026-09-04'];
+  var WEEK_ORDER = ['2026-09-15', '2026-09-08', '2026-09-04'];
 
   var WEEKS = {
+    '2026-09-15': {
+      shortLabel: 'Sep 15',
+      metaLabel: 'Week of Sep 15, 2026',
+      total: 7,
+      countiesRepresented: 4,
+      topArea: { label: 'tied, 3 areas', count: 2 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 6 },
+          { label: '20–29', count: 1 }
+        ],
+        race: [
+          { label: 'American Indian/Alaskan Native', count: 3 },
+          { label: 'White', count: 2 },
+          { label: 'Black', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Meade', count: 2 },
+          { label: 'Minnehaha', count: 2 },
+          { label: 'Pennington', count: 2 },
+          { label: 'Grant', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 5 },
+          { label: 'Female', count: 2 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-09-15.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-09-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Minnehaha,Male\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+        "10-19,Black,Minnehaha,Male\n" +
+        "10-19,Unknown,Grant,Male\n" +
+        "10-19,White,Meade,Female\n" +
+        "10-19,White,Meade,Female\n" +
+        "20-29,American Indian/Alaskan Native,Pennington,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,6\n" +
+        "age_range,20-29,1\n" +
+        "race,American Indian/Alaskan Native,3\n" +
+        "race,White,2\n" +
+        "race,Black,1\n" +
+        "race,Unknown,1\n" +
+        "county,Meade,2\n" +
+        "county,Minnehaha,2\n" +
+        "county,Pennington,2\n" +
+        "county,Grant,1\n" +
+        "sex,Male,5\n" +
+        "sex,Female,2\n"
+    },
     '2026-09-04': {
       shortLabel: 'Sep 4',
       metaLabel: 'Week of Sep 4, 2026',
@@ -536,7 +588,7 @@
     });
 
     document.getElementById('meta-week').textContent = w.metaLabel;
-    document.getElementById('meta-cases').textContent = w.total + ' open cases';
+    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
     document.getElementById('kpi-open').textContent = w.total;
     document.getElementById('kpi-counties').textContent = w.countiesRepresented;
     document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';

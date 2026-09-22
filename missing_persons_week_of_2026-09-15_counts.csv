@@ -1,0 +1,18 @@
+field,value,count
+age_range,10-19,28
+age_range,40-49,2
+age_range,30-39,1
+race,Black,17
+race,White,11
+race,American Indian Or Alaskan Native,1
+race,Asian Or Pacific Islander,1
+race,Unknown,1
+county,Douglas County,24
+county,Sarpy County,2
+county,Adams County,1
+county,Buffalo County,1
+county,Dodge County,1
+county,Hall County,1
+county,Lancaster County,1
+sex,F,21
+sex,M,10

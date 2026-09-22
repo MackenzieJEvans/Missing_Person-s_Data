@@ -339,9 +339,95 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-09-08', '2026-09-03'];
+  var WEEK_ORDER = ['2026-09-15', '2026-09-08', '2026-09-03'];
 
   var WEEKS = {
+    '2026-09-15': {
+      shortLabel: 'Sep 15',
+      metaLabel: 'Week of Sep 15, 2026',
+      total: 31,
+      countiesRepresented: 7,
+      topArea: { label: 'Douglas Co.', count: 24 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 28 },
+          { label: '30–39', count: 1 },
+          { label: '40–49', count: 2 }
+        ],
+        race: [
+          { label: 'Black', count: 17 },
+          { label: 'White', count: 11 },
+          { label: 'Am. Indian / Alaskan Native', count: 1 },
+          { label: 'Asian / Pacific Islander', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 24 },
+          { label: 'Sarpy County', count: 2 },
+          { label: 'Adams County', count: 1 },
+          { label: 'Buffalo County', count: 1 },
+          { label: 'Dodge County', count: 1 },
+          { label: 'Hall County', count: 1 },
+          { label: 'Lancaster County', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 21 },
+          { label: 'Male', count: 10 }
+        ]
+      },
+      rawFilename: 'missing_persons_week_of_2026-09-15.csv',
+      countsFilename: 'missing_persons_week_of_2026-09-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian Or Alaskan Native,Sarpy County,M\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Hall County,F\n" +
+        "10-19,Unknown,Douglas County,F\n" +
+        "10-19,White,Adams County,F\n" +
+        "10-19,White,Buffalo County,M\n" +
+        "10-19,White,Dodge County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Lancaster County,F\n" +
+        "10-19,White,Sarpy County,M\n" +
+        "30-39,White,Douglas County,F\n" +
+        "40-49,White,Douglas County,F\n" +
+        "40-49,White,Douglas County,F\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,28\n" +
+        "age_range,40-49,2\n" +
+        "age_range,30-39,1\n" +
+        "race,Black,17\n" +
+        "race,White,11\n" +
+        "race,American Indian Or Alaskan Native,1\n" +
+        "race,Asian Or Pacific Islander,1\n" +
+        "race,Unknown,1\n" +
+        "county,Douglas County,24\n" +
+        "county,Sarpy County,2\n" +
+        "county,Adams County,1\n" +
+        "county,Buffalo County,1\n" +
+        "county,Dodge County,1\n" +
+        "county,Hall County,1\n" +
+        "county,Lancaster County,1\n" +
+        "sex,F,21\n" +
+        "sex,M,10\n"
+    },
     '2026-09-03': {
       shortLabel: 'Sep 3',
       metaLabel: 'Week of Sep 3, 2026',
@@ -609,7 +695,7 @@
     });
 
     document.getElementById('meta-week').textContent = w.metaLabel;
-    document.getElementById('meta-cases').textContent = w.total + ' open cases';
+    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
     document.getElementById('kpi-open').textContent = w.total;
     document.getElementById('kpi-counties').textContent = w.countiesRepresented;
     document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';

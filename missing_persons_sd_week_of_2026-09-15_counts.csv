@@ -1,0 +1,13 @@
+field,value,count
+age_range,10-19,6
+age_range,20-29,1
+race,American Indian/Alaskan Native,3
+race,White,2
+race,Black,1
+race,Unknown,1
+county,Meade,2
+county,Minnehaha,2
+county,Pennington,2
+county,Grant,1
+sex,Male,5
+sex,Female,2

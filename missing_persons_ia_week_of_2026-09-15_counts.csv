@@ -1,0 +1,15 @@
+field,value,count
+age_range,10-19,15
+age_range,20-29,1
+race,White,10
+race,Black,5
+race,Asian or Pacific Islander,1
+county,Polk,6
+county,Scott,3
+county,Linn,2
+county,Unknown,2
+county,Appanoose,1
+county,Jackson,1
+county,Johnson,1
+sex,Female,9
+sex,Male,7

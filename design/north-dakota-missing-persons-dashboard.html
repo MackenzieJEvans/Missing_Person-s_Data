@@ -65,6 +65,42 @@
     color: var(--muted);
     max-width: 62ch;
   }
+  .week-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .week-select-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .week-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 7px 16px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .week-btn:hover { border-color: var(--line-strong); }
+  .week-btn:focus-visible { outline: 2px solid var(--ink-strong); outline-offset: 2px; }
+  .week-btn[aria-pressed="true"] {
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    color: var(--bg);
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -250,10 +286,13 @@
   <p class="eyebrow mono">North Dakota Attorney General &middot; Public Safety Data</p>
   <h1>Missing Persons Dashboard</h1>
   <p class="dek">Unresolved missing-persons cases by report week, broken out by age, race, county, and sex &mdash; de-identified from the state's public missing-persons list.</p>
+
+  <div class="week-select mono" id="week-select" role="group" aria-label="Select week"></div>
+
   <div class="meta mono">
-    <span>Week of Sep 8, 2026</span>
+    <span id="meta-week">Week of Sep 8, 2026</span>
     <span class="sep">&middot;</span>
-    <span>4 open cases</span>
+    <span id="meta-cases">4 open cases</span>
     <span class="sep">&middot;</span>
     <span class="dim">missingpersons.nd.gov</span>
   </div>
@@ -273,144 +312,226 @@
   <div class="kpis">
     <div class="kpi">
       <p class="kpi-label">Open cases</p>
-      <div class="kpi-value mono">4</div>
+      <div class="kpi-value mono" id="kpi-open">4</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Counties / agencies represented</p>
-      <div class="kpi-value mono">4</div>
+      <div class="kpi-value mono" id="kpi-counties">4</div>
     </div>
     <div class="kpi">
       <p class="kpi-label">Most-affected county</p>
-      <div class="kpi-value mono">1<span class="unit">&middot; tied, 4 counties</span></div>
+      <div class="kpi-value mono" id="kpi-top">1<span class="unit">&middot; tied, 4 counties</span></div>
     </div>
   </div>
 
   <div class="charts-grid" id="charts"></div>
 
   <div class="foot">
-    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is bucketed from current age, not age when reported missing &mdash; see the note on the age chart before comparing age ranges with Nebraska or South Dakota. BIA/tribal agencies (e.g. BIA Turtle Mountain Agency) would appear in the county field by agency name rather than a county, since no single county covers their jurisdiction. With only 4 records this week, every cell is small enough to be identifying &mdash; read accordingly.</p>
+    <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is bucketed from current age, not age when reported missing &mdash; see the note on the age chart before comparing age ranges with Nebraska or South Dakota. BIA/tribal agencies (e.g. BIA Turtle Mountain Agency) would appear in the county field by agency name rather than a county, since no single county covers their jurisdiction. North Dakota's weekly volume is small &mdash; nearly every cell is small enough to be identifying, in any week shown here &mdash; read accordingly.</p>
     <p class="src">Source: North Dakota Missing Persons Search (missingpersons.nd.gov)</p>
   </div>
 </div>
 
 <script>
   var FIELDS = ['age_range', 'race', 'county', 'sex'];
-  var DATA = {
-    age_range: {
-      title: 'Cases by age (current age)',
-      caveat: 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.',
-      rows: [
-        { label: '10–19', count: 3 },
-        { label: '60–69', count: 1 }
-      ]
-    },
-    race: { title: 'Cases by race', rows: [
-      { label: 'White', count: 3 },
-      { label: 'American Indian', count: 1 }
-    ]},
-    county: { title: 'Cases by county', rows: [
-      { label: 'Burleigh', count: 1 },
-      { label: 'Cass', count: 1 },
-      { label: 'Morton', count: 1 },
-      { label: 'Stark', count: 1 }
-    ]},
-    sex: { title: 'Cases by sex', rows: [
-      { label: 'Female', count: 2 },
-      { label: 'Male', count: 2 }
-    ]}
+  var FIELD_TITLES = {
+    age_range: 'Cases by age (current age)',
+    race: 'Cases by race',
+    county: 'Cases by county',
+    sex: 'Cases by sex'
   };
-  var TOTAL = 4;
+  var AGE_CAVEAT = 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.';
 
-  var grid = document.getElementById('charts');
+  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
 
-  FIELDS.forEach(function (field) {
-    var group = DATA[field];
-    var rows = group.rows.slice().sort(function (a, b) {
-      if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
-      return b.count - a.count;
-    });
-    var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
-
-    var card = document.createElement('div');
-    card.className = 'card';
-
-    var head = document.createElement('div');
-    head.className = 'card-head';
-    var h2 = document.createElement('h2');
-    h2.textContent = group.title;
-    var total = document.createElement('span');
-    total.className = 'card-total mono';
-    total.textContent = 'n = ' + TOTAL;
-    head.appendChild(h2);
-    head.appendChild(total);
-    card.appendChild(head);
-
-    if (group.caveat) {
-      var caveat = document.createElement('p');
-      caveat.className = 'card-caveat';
-      caveat.textContent = group.caveat;
-      card.appendChild(caveat);
-    } else {
-      var spacer = document.createElement('div');
-      spacer.className = 'card-note-spacer';
-      card.appendChild(spacer);
+  var WEEKS = {
+    '2026-09-08': {
+      shortLabel: 'Sep 8',
+      metaLabel: 'Week of Sep 8, 2026',
+      total: 4,
+      countiesRepresented: 4,
+      topArea: { label: 'tied, 4 counties', count: 1 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 3 },
+          { label: '60–69', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 3 },
+          { label: 'American Indian', count: 1 }
+        ],
+        county: [
+          { label: 'Burleigh', count: 1 },
+          { label: 'Cass', count: 1 },
+          { label: 'Morton', count: 1 },
+          { label: 'Stark', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 2 },
+          { label: 'Male', count: 2 }
+        ]
+      },
+      rawFilename: 'missing_persons_nd_week_of_2026-09-08.csv',
+      countsFilename: 'missing_persons_nd_week_of_2026-09-08_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian,Morton,Male\n" +
+        "10-19,White,Burleigh,Male\n" +
+        "10-19,White,Cass,Female\n" +
+        "60-69,White,Stark,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,3\n" +
+        "age_range,60-69,1\n" +
+        "race,White,3\n" +
+        "race,American Indian,1\n" +
+        "county,Burleigh,1\n" +
+        "county,Cass,1\n" +
+        "county,Morton,1\n" +
+        "county,Stark,1\n" +
+        "sex,Female,2\n" +
+        "sex,Male,2\n"
+    },
+    '2026-09-15': {
+      shortLabel: 'Sep 15',
+      metaLabel: 'Week of Sep 15, 2026',
+      total: 1,
+      countiesRepresented: 1,
+      topArea: { label: 'Grand Forks', count: 1 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 1 }
+        ],
+        race: [
+          { label: 'Black', count: 1 }
+        ],
+        county: [
+          { label: 'Grand Forks', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 1 }
+        ]
+      },
+      rawFilename: 'missing_persons_nd_week_of_2026-09-15.csv',
+      countsFilename: 'missing_persons_nd_week_of_2026-09-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Black,Grand Forks,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,1\n" +
+        "race,Black,1\n" +
+        "county,Grand Forks,1\n" +
+        "sex,Female,1\n"
     }
+  };
 
-    var bars = document.createElement('div');
-    bars.className = 'bars';
+  var currentWeek = WEEK_ORDER[0];
+  var downloadsApi = null;
 
-    rows.forEach(function (r) {
-      var pct = Math.round((r.count / TOTAL) * 100);
-      var width = Math.round((r.count / max) * 100);
-
-      var row = document.createElement('div');
-      row.className = 'bar-row';
-
-      var label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = r.label;
-
-      var track = document.createElement('div');
-      track.className = 'bar-track';
-      var fill = document.createElement('div');
-      fill.className = 'bar-fill';
-      track.appendChild(fill);
-
-      var value = document.createElement('div');
-      value.className = 'bar-value mono';
-      value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
-
-      row.appendChild(label);
-      row.appendChild(track);
-      row.appendChild(value);
-      bars.appendChild(row);
-
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { fill.style.width = width + '%'; });
-      });
-    });
-
-    card.appendChild(bars);
-    grid.appendChild(card);
+  var weekSelect = document.getElementById('week-select');
+  var label = document.createElement('span');
+  label.className = 'week-select-label';
+  label.textContent = 'Week';
+  weekSelect.appendChild(label);
+  WEEK_ORDER.forEach(function (weekId) {
+    var btn = document.createElement('button');
+    btn.className = 'week-btn';
+    btn.type = 'button';
+    btn.setAttribute('data-week', weekId);
+    btn.setAttribute('aria-pressed', weekId === currentWeek ? 'true' : 'false');
+    btn.textContent = WEEKS[weekId].shortLabel;
+    btn.addEventListener('click', function () { renderWeek(weekId); });
+    weekSelect.appendChild(btn);
   });
 
-  var RAW_CSV = "age_range,race,county,sex\n" +
-    "10-19,American Indian,Morton,Male\n" +
-    "10-19,White,Burleigh,Male\n" +
-    "10-19,White,Cass,Female\n" +
-    "60-69,White,Stark,Female\n";
+  function buildCharts(data, total) {
+    var grid = document.getElementById('charts');
+    grid.innerHTML = '';
 
-  var COUNTS_CSV = "field,value,count\n" +
-    "age_range,10-19,3\n" +
-    "age_range,60-69,1\n" +
-    "race,White,3\n" +
-    "race,American Indian,1\n" +
-    "county,Burleigh,1\n" +
-    "county,Cass,1\n" +
-    "county,Morton,1\n" +
-    "county,Stark,1\n" +
-    "sex,Female,2\n" +
-    "sex,Male,2\n";
+    FIELDS.forEach(function (field) {
+      var rows = data[field].slice().sort(function (a, b) {
+        if (field === 'age_range') { return parseInt(a.label, 10) - parseInt(b.label, 10); }
+        return b.count - a.count;
+      });
+      var max = Math.max.apply(null, rows.map(function (r) { return r.count; }));
+
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var head = document.createElement('div');
+      head.className = 'card-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = FIELD_TITLES[field];
+      var totalEl = document.createElement('span');
+      totalEl.className = 'card-total mono';
+      totalEl.textContent = 'n = ' + total;
+      head.appendChild(h2);
+      head.appendChild(totalEl);
+      card.appendChild(head);
+
+      if (field === 'age_range') {
+        var caveat = document.createElement('p');
+        caveat.className = 'card-caveat';
+        caveat.textContent = AGE_CAVEAT;
+        card.appendChild(caveat);
+      } else {
+        var spacer = document.createElement('div');
+        spacer.className = 'card-note-spacer';
+        card.appendChild(spacer);
+      }
+
+      var bars = document.createElement('div');
+      bars.className = 'bars';
+
+      rows.forEach(function (r) {
+        var pct = Math.round((r.count / total) * 100);
+        var width = Math.round((r.count / max) * 100);
+
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'bar-label';
+        lbl.textContent = r.label;
+
+        var track = document.createElement('div');
+        track.className = 'bar-track';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        track.appendChild(fill);
+
+        var value = document.createElement('div');
+        value.className = 'bar-value mono';
+        value.innerHTML = '<span class="count">' + r.count + '</span> <span class="pct">&middot; ' + pct + '%</span>';
+
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(value);
+        bars.appendChild(row);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = width + '%'; });
+        });
+      });
+
+      card.appendChild(bars);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderWeek(weekId) {
+    currentWeek = weekId;
+    var w = WEEKS[weekId];
+
+    document.querySelectorAll('.week-btn').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-week') === weekId ? 'true' : 'false');
+    });
+
+    document.getElementById('meta-week').textContent = w.metaLabel;
+    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
+    document.getElementById('kpi-open').textContent = w.total;
+    document.getElementById('kpi-counties').textContent = w.countiesRepresented;
+    document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
+
+    buildCharts(w.data, w.total);
+  }
 
   function saveCsv(downloads, filename, data) {
     downloads.save({ filename: filename, data: data }).catch(function (err) {
@@ -419,17 +540,22 @@
     });
   }
 
+  renderWeek(currentWeek);
+
   (function () {
     if (typeof window.claude === 'undefined' || !window.claude.use) return;
     window.claude.use('downloads').then(function (downloads) {
       if (!downloads) return;
+      downloadsApi = downloads;
       var bar = document.getElementById('download-bar');
       bar.hidden = false;
       document.getElementById('dl-raw').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_nd_week_of_2026-09-08.csv', RAW_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.rawFilename, w.rawCsv);
       });
       document.getElementById('dl-counts').addEventListener('click', function () {
-        saveCsv(downloads, 'missing_persons_nd_week_of_2026-09-08_counts.csv', COUNTS_CSV);
+        var w = WEEKS[currentWeek];
+        saveCsv(downloadsApi, w.countsFilename, w.countsCsv);
       });
     }).catch(function () {});
   })();
