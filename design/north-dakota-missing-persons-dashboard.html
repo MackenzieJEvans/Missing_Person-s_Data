@@ -9,6 +9,7 @@
     --line-strong: oklch(36% 0.007 95);
     --muted: oklch(63% 0.006 95);
     --track: oklch(24% 0.006 95);
+    --xtab-prev-bar: oklch(58% 0.006 95);
   }
 
   * { box-sizing: border-box; }
@@ -260,6 +261,12 @@
   .foot .note { max-width: 56ch; }
   .foot .src { white-space: nowrap; text-align: right; }
 
+  .crosstab-wrap { margin-top: 16px; }
+  .xtab-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .xtab-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .xtab-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .xtab-chart-wrap { width: 100%; overflow-x: auto; }
+
   @media (max-width: 640px) {
     .kpis { grid-template-columns: 1fr; }
     .charts-grid { grid-template-columns: 1fr; }
@@ -325,6 +332,8 @@
   </div>
 
   <div class="charts-grid" id="charts"></div>
+
+  <div class="crosstab-wrap" id="crosstab-wrap"></div>
 
   <div class="foot">
     <p class="note">Counts reflect people still listed as missing when this snapshot was taken, not everyone reported that week. Age is bucketed from current age, not age when reported missing &mdash; see the note on the age chart before comparing age ranges with Nebraska or South Dakota. BIA/tribal agencies (e.g. BIA Turtle Mountain Agency) would appear in the county field by agency name rather than a county, since no single county covers their jurisdiction. North Dakota's weekly volume is small &mdash; nearly every cell is small enough to be identifying, in any week shown here &mdash; read accordingly.</p>
@@ -516,6 +525,194 @@
     });
   }
 
+  var XTAB_RACE_ORDER = ['Black', 'White', 'American Indian', 'Asian', 'Unknown'];
+  var XTAB_PREV_COLOR = 'var(--xtab-prev-bar)';
+  var XTAB_CURR_COLOR = 'var(--ink-strong)';
+  var SVGNS = 'http://www.w3.org/2000/svg';
+
+  function xtabShortRace(raw) {
+    if (/american indian/i.test(raw)) return 'American Indian';
+    if (/asian/i.test(raw)) return 'Asian';
+    return raw;
+  }
+  function xtabNormSex(raw) {
+    return (raw === 'F' || raw === 'Female') ? 'Female' : 'Male';
+  }
+  function xtabCompute(rawCsv) {
+    var lines = rawCsv.trim().split('\n');
+    lines.shift();
+    var map = {};
+    lines.forEach(function (line) {
+      if (!line) return;
+      var parts = line.split(',');
+      var key = xtabShortRace(parts[1]) + '|' + xtabNormSex(parts[3]);
+      map[key] = (map[key] || 0) + 1;
+    });
+    return map;
+  }
+  function xtabCategories(mapA, mapB) {
+    var seen = {};
+    Object.keys(mapA).forEach(function (k) { seen[k] = true; });
+    Object.keys(mapB).forEach(function (k) { seen[k] = true; });
+    var cats = [];
+    XTAB_RACE_ORDER.forEach(function (race) {
+      ['Female', 'Male'].forEach(function (sex) {
+        var key = race + '|' + sex;
+        if (seen[key]) cats.push({ race: race, sex: sex, key: key });
+      });
+    });
+    return cats;
+  }
+  function xtabNiceStep(max) {
+    var candidates = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000];
+    for (var i = 0; i < candidates.length; i++) {
+      if (Math.ceil(max / candidates[i]) <= 7) return candidates[i];
+    }
+    return Math.ceil(max / 700) * 100;
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS(SVGNS, tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    }
+    return el;
+  }
+
+  function buildCrosstabChart(categories, mapPrev, mapCurr, solo) {
+    var W = 960, H = 380;
+    var padL = 40, padR = 12, padT = 16, padB = 60;
+    var plotW = W - padL - padR;
+    var plotH = H - padT - padB;
+
+    var maxVal = 0;
+    categories.forEach(function (c) {
+      maxVal = Math.max(maxVal, mapPrev[c.key] || 0, mapCurr[c.key] || 0);
+    });
+    if (maxVal === 0) maxVal = 1;
+    var step = xtabNiceStep(maxVal);
+    var axisMax = Math.ceil(maxVal / step) * step;
+    if (axisMax === 0) axisMax = step;
+
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H });
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+    svg.style.display = 'block';
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Cases by race and sex, grouped bar chart');
+
+    for (var v = 0; v <= axisMax; v += step) {
+      var y = padT + plotH - (v / axisMax) * plotH;
+      svg.appendChild(svgEl('line', { x1: padL, x2: padL + plotW, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 1 }));
+      var t = svgEl('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 12 });
+      t.setAttribute('fill', 'var(--muted)');
+      t.setAttribute('font-family', "'IBM Plex Mono', ui-monospace, monospace");
+      t.textContent = v;
+      svg.appendChild(t);
+    }
+
+    var n = categories.length;
+    var bandW = plotW / n;
+    var barGap = bandW * 0.08;
+    var outerPad = bandW * 0.1;
+    var barW = solo ? bandW * 0.36 : (bandW - 2 * outerPad - barGap) / 2;
+
+    categories.forEach(function (c, i) {
+      var bandX = padL + i * bandW;
+
+      if (!solo) {
+        var prevV = mapPrev[c.key] || 0;
+        var xPrev = bandX + outerPad;
+        var hPrev = (prevV / axisMax) * plotH;
+        svg.appendChild(svgEl('rect', { x: xPrev, y: padT + plotH - hPrev, width: barW, height: hPrev, fill: XTAB_PREV_COLOR }));
+        if (prevV > 0) {
+          var lp = svgEl('text', { x: xPrev + barW / 2, y: padT + plotH - hPrev - 6, 'text-anchor': 'middle', 'font-size': 11 });
+          lp.setAttribute('fill', 'var(--muted)');
+          lp.setAttribute('font-family', "'IBM Plex Mono', ui-monospace, monospace");
+          lp.textContent = prevV;
+          svg.appendChild(lp);
+        }
+      }
+
+      var currV = mapCurr[c.key] || 0;
+      var xCurr = solo ? bandX + (bandW - barW) / 2 : bandX + outerPad + barW + barGap;
+      var hCurr = (currV / axisMax) * plotH;
+      svg.appendChild(svgEl('rect', { x: xCurr, y: padT + plotH - hCurr, width: barW, height: hCurr, fill: XTAB_CURR_COLOR }));
+      if (currV > 0) {
+        var lc = svgEl('text', { x: xCurr + barW / 2, y: padT + plotH - hCurr - 6, 'text-anchor': 'middle', 'font-size': 11 });
+        lc.setAttribute('fill', 'var(--muted)');
+        lc.setAttribute('font-family', "'IBM Plex Mono', ui-monospace, monospace");
+        lc.textContent = currV;
+        svg.appendChild(lc);
+      }
+
+      var labelX = bandX + bandW / 2;
+      var raceText = svgEl('text', { x: labelX, y: padT + plotH + 22, 'text-anchor': 'middle', 'font-size': 12.5 });
+      raceText.setAttribute('fill', 'var(--ink)');
+      raceText.setAttribute('font-family', "'IBM Plex Sans', sans-serif");
+      raceText.textContent = c.race;
+      svg.appendChild(raceText);
+      var sexText = svgEl('text', { x: labelX, y: padT + plotH + 38, 'text-anchor': 'middle', 'font-size': 12.5 });
+      sexText.setAttribute('fill', 'var(--ink)');
+      sexText.setAttribute('font-family', "'IBM Plex Sans', sans-serif");
+      sexText.textContent = c.sex + 's';
+      svg.appendChild(sexText);
+    });
+
+    svg.appendChild(svgEl('line', { x1: padL, x2: padL + plotW, y1: padT + plotH, y2: padT + plotH, stroke: 'var(--line-strong)', 'stroke-width': 1 }));
+
+    return svg;
+  }
+
+  function renderCrosstab(currMap, currTotal, currLabel, prevMap, prevLabel) {
+    var container = document.getElementById('crosstab-wrap');
+    container.innerHTML = '';
+
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = 'Cases by race and sex';
+    var totalEl = document.createElement('span');
+    totalEl.className = 'card-total mono';
+    totalEl.textContent = 'n = ' + currTotal;
+    head.appendChild(h2);
+    head.appendChild(totalEl);
+    card.appendChild(head);
+
+    var solo = !prevMap;
+
+    if (solo) {
+      var note = document.createElement('p');
+      note.className = 'card-caveat';
+      note.textContent = 'No earlier week to compare — showing ' + currLabel + ' only.';
+      card.appendChild(note);
+    } else {
+      var legend = document.createElement('div');
+      legend.className = 'xtab-legend';
+      [[prevLabel, XTAB_PREV_COLOR], [currLabel, XTAB_CURR_COLOR]].forEach(function (pair) {
+        var item = document.createElement('span');
+        item.className = 'xtab-legend-item';
+        var sw = document.createElement('span');
+        sw.className = 'xtab-swatch';
+        sw.style.background = pair[1];
+        item.appendChild(sw);
+        item.appendChild(document.createTextNode(pair[0]));
+        legend.appendChild(item);
+      });
+      card.appendChild(legend);
+    }
+
+    var categories = xtabCategories(prevMap || {}, currMap);
+    var chartWrap = document.createElement('div');
+    chartWrap.className = 'xtab-chart-wrap';
+    chartWrap.appendChild(buildCrosstabChart(categories, prevMap || {}, currMap, solo));
+    card.appendChild(chartWrap);
+
+    container.appendChild(card);
+  }
+
   function renderWeek(weekId) {
     currentWeek = weekId;
     var w = WEEKS[weekId];
@@ -531,6 +728,12 @@
     document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
 
     buildCharts(w.data, w.total);
+
+    var idx = WEEK_ORDER.indexOf(weekId);
+    var prevWeekId = WEEK_ORDER[idx + 1];
+    var currXtabMap = xtabCompute(w.rawCsv);
+    var prevXtabMap = prevWeekId ? xtabCompute(WEEKS[prevWeekId].rawCsv) : null;
+    renderCrosstab(currXtabMap, w.total, w.shortLabel, prevXtabMap, prevWeekId ? WEEKS[prevWeekId].shortLabel : null);
   }
 
   function saveCsv(downloads, filename, data) {
