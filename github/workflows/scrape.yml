@@ -1,0 +1,71 @@
+name: Weekly missing-persons scrape
+
+on:
+  schedule:
+    # Every Wednesday at 10:00 UTC (~4-5am Central, before the workday starts
+    # in any of the four states covered).
+    - cron: '0 10 * * 3'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scrape Nebraska
+        id: ne
+        continue-on-error: true
+        run: python scrape.py --include-county --include-sex
+
+      - name: Scrape South Dakota
+        id: sd
+        continue-on-error: true
+        run: python scrape_sd.py
+
+      - name: Scrape Iowa
+        id: ia
+        continue-on-error: true
+        run: python scrape_ia.py
+
+      - name: Scrape North Dakota
+        id: nd
+        continue-on-error: true
+        run: python scrape_nd.py
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add missing_persons_*.csv agency_county_map*.csv
+          if git diff --cached --quiet; then
+            echo "No data changes this run."
+          else
+            git commit -m "Weekly scrape: $(date -u +%F)"
+            git push
+          fi
+
+      - name: Fail the run if any state's scrape failed
+        if: |
+          steps.ne.outcome == 'failure' ||
+          steps.sd.outcome == 'failure' ||
+          steps.ia.outcome == 'failure' ||
+          steps.nd.outcome == 'failure'
+        run: |
+          echo "One or more state scrapes failed this run - check the job logs above." >&2
+          echo "Any states that succeeded were still committed and pushed." >&2
+          exit 1
