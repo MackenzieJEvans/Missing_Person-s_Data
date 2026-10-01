@@ -342,9 +342,89 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-09-15', '2026-09-08', '2026-09-03'];
+  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08', '2026-09-03'];
 
   var WEEKS = {
+    '2026-09-23': {
+      shortLabel: 'Sep 23',
+      metaLabel: 'Week of Sep 23, 2026',
+      total: 27,
+      countiesRepresented: 7,
+      topArea: { label: 'Douglas Co.', count: 15 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 26 },
+          { label: '40–49', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 14 },
+          { label: 'Black', count: 10 },
+          { label: 'Am. Indian / Alaskan Native', count: 1 },
+          { label: 'Asian / Pacific Islander', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 15 },
+          { label: 'Lancaster County', count: 4 },
+          { label: 'Sarpy County', count: 3 },
+          { label: 'Cheyenne County', count: 2 },
+          { label: 'Buffalo County', count: 1 },
+          { label: 'Dodge County', count: 1 },
+          { label: 'Hall County', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 20 },
+          { label: 'Female', count: 7 }
+        ]
+      },
+      rawFilename: 'missing_persons_week_of_2026-09-23.csv',
+      countsFilename: 'missing_persons_week_of_2026-09-23_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,M\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,M\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Lancaster County,M\n" +
+        "10-19,Black,Sarpy County,M\n" +
+        "10-19,Unknown,Hall County,F\n" +
+        "10-19,White,Buffalo County,M\n" +
+        "10-19,White,Cheyenne County,M\n" +
+        "10-19,White,Cheyenne County,M\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Sarpy County,F\n" +
+        "10-19,White,Sarpy County,M\n" +
+        "40-49,White,Dodge County,M\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,26\n" +
+        "age_range,40-49,1\n" +
+        "race,White,14\n" +
+        "race,Black,10\n" +
+        "race,American Indian Or Alaskan Native,1\n" +
+        "race,Asian Or Pacific Islander,1\n" +
+        "race,Unknown,1\n" +
+        "county,Douglas County,15\n" +
+        "county,Lancaster County,4\n" +
+        "county,Sarpy County,3\n" +
+        "county,Cheyenne County,2\n" +
+        "county,Buffalo County,1\n" +
+        "county,Dodge County,1\n" +
+        "county,Hall County,1\n" +
+        "sex,M,20\n" +
+        "sex,F,7\n"
+    },
     '2026-09-15': {
       shortLabel: 'Sep 15',
       metaLabel: 'Week of Sep 15, 2026',

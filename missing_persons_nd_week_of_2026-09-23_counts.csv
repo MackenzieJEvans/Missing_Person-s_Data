@@ -1,0 +1,12 @@
+field,value,count
+age_range,10-19,6
+race,White,4
+race,American Indian,1
+race,Unknown,1
+county,Ward,2
+county,Burleigh,1
+county,Cass,1
+county,Stark,1
+county,Stutsman,1
+sex,Female,5
+sex,Male,1

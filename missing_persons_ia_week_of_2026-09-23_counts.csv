@@ -1,0 +1,15 @@
+field,value,count
+age_range,10-19,13
+age_range,30-39,1
+race,White,9
+race,Black,5
+county,Black Hawk,2
+county,Linn,2
+county,Polk,2
+county,Pottawattamie,2
+county,Scott,2
+county,Woodbury,2
+county,Lee,1
+county,Unknown,1
+sex,Female,8
+sex,Male,6

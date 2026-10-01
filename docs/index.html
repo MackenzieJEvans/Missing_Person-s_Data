@@ -348,9 +348,111 @@
 <script>
   var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
 
-  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
+  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08'];
 
   var WEEKS = {
+    '2026-09-23': {
+      shortLabel: 'Sep 23',
+      metaLabel: 'Week of Sep 23, 2026',
+      weekPhrase: 'for the week of Sep 23, 2026',
+      total: 50,
+      statesRepresented: 4,
+      topState: { label: 'Nebraska', count: 27 },
+      rawByState: {
+        NE: "age_range,race,county,sex\n" +
+          "10-19,American Indian Or Alaskan Native,Douglas County,M\n" +
+          "10-19,Asian Or Pacific Islander,Douglas County,M\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Lancaster County,M\n" +
+          "10-19,Black,Sarpy County,M\n" +
+          "10-19,Unknown,Hall County,F\n" +
+          "10-19,White,Buffalo County,M\n" +
+          "10-19,White,Cheyenne County,M\n" +
+          "10-19,White,Cheyenne County,M\n" +
+          "10-19,White,Douglas County,F\n" +
+          "10-19,White,Douglas County,F\n" +
+          "10-19,White,Douglas County,M\n" +
+          "10-19,White,Douglas County,M\n" +
+          "10-19,White,Douglas County,M\n" +
+          "10-19,White,Lancaster County,M\n" +
+          "10-19,White,Lancaster County,M\n" +
+          "10-19,White,Lancaster County,M\n" +
+          "10-19,White,Sarpy County,F\n" +
+          "10-19,White,Sarpy County,M\n" +
+          "40-49,White,Dodge County,M\n",
+        SD: "age_range,race,county,sex\n" +
+          "10-19,American Indian/Alaskan Native,Pennington,Male\n" +
+          "10-19,Unknown,Crow Creek Tribal Police Dept,Male\n" +
+          "10-19,White,Meade,Female\n",
+        IA: "age_range,race,county,sex\n" +
+          "10-19,Black,Black Hawk,Female\n" +
+          "10-19,Black,Black Hawk,Male\n" +
+          "10-19,Black,Linn,Female\n" +
+          "10-19,Black,Scott,Male\n" +
+          "10-19,White,Lee,Male\n" +
+          "10-19,White,Linn,Female\n" +
+          "10-19,White,Polk,Female\n" +
+          "10-19,White,Pottawattamie,Male\n" +
+          "10-19,White,Pottawattamie,Male\n" +
+          "10-19,White,Scott,Male\n" +
+          "10-19,White,Unknown,Female\n" +
+          "10-19,White,Woodbury,Female\n" +
+          "10-19,White,Woodbury,Female\n" +
+          "30-39,Black,Polk,Female\n",
+        ND: "age_range,race,county,sex\n" +
+          "10-19,American Indian,Ward,Female\n" +
+          "10-19,Unknown,Stutsman,Female\n" +
+          "10-19,White,Burleigh,Male\n" +
+          "10-19,White,Cass,Female\n" +
+          "10-19,White,Stark,Female\n" +
+          "10-19,White,Ward,Female\n"
+      },
+      stateData: [
+        { label: 'Nebraska', count: 27 },
+        { label: 'Iowa', count: 14 },
+        { label: 'North Dakota', count: 6 },
+        { label: 'South Dakota', count: 3 }
+      ],
+      raceData: [
+        { label: 'White', count: 28 },
+        { label: 'Black', count: 15 },
+        { label: 'American Indian / Alaskan Native', count: 3 },
+        { label: 'Unknown', count: 3 },
+        { label: 'Asian / Pacific Islander', count: 1 }
+      ],
+      sexData: [
+        { label: 'Male', count: 29 },
+        { label: 'Female', count: 21 }
+      ],
+      ageData: [
+        { label: '10–19', count: 48 },
+        { label: '30–39', count: 1 },
+        { label: '40–49', count: 1 }
+      ],
+      countsFilename: 'missing_persons_combined_week_of_2026-09-23_counts.csv',
+      countsCsv: "state,field,value,count\n" +
+        "NE,total,open_cases,27\n" +
+        "SD,total,open_cases,3\n" +
+        "IA,total,open_cases,14\n" +
+        "ND,total,open_cases,6\n" +
+        "ALL,race,White,28\n" +
+        "ALL,race,Black,15\n" +
+        "ALL,race,American Indian / Alaskan Native,3\n" +
+        "ALL,race,Unknown,3\n" +
+        "ALL,race,Asian / Pacific Islander,1\n" +
+        "ALL,sex,Male,29\n" +
+        "ALL,sex,Female,21\n" +
+        "ALL,age_range,10-19,48\n" +
+        "ALL,age_range,30-39,1\n" +
+        "ALL,age_range,40-49,1\n"
+    },
     '2026-09-08': {
       shortLabel: 'Sep 8',
       metaLabel: 'Week of Sep 8, 2026',

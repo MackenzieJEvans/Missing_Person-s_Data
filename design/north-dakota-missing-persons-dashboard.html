@@ -351,9 +351,58 @@
   };
   var AGE_CAVEAT = 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.';
 
-  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
+  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08'];
 
   var WEEKS = {
+    '2026-09-23': {
+      shortLabel: 'Sep 23',
+      metaLabel: 'Week of Sep 23, 2026',
+      total: 6,
+      countiesRepresented: 5,
+      topArea: { label: 'Ward', count: 2 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 6 }
+        ],
+        race: [
+          { label: 'White', count: 4 },
+          { label: 'American Indian', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Ward', count: 2 },
+          { label: 'Burleigh', count: 1 },
+          { label: 'Cass', count: 1 },
+          { label: 'Stark', count: 1 },
+          { label: 'Stutsman', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 5 },
+          { label: 'Male', count: 1 }
+        ]
+      },
+      rawFilename: 'missing_persons_nd_week_of_2026-09-23.csv',
+      countsFilename: 'missing_persons_nd_week_of_2026-09-23_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian,Ward,Female\n" +
+        "10-19,Unknown,Stutsman,Female\n" +
+        "10-19,White,Burleigh,Male\n" +
+        "10-19,White,Cass,Female\n" +
+        "10-19,White,Stark,Female\n" +
+        "10-19,White,Ward,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,6\n" +
+        "race,White,4\n" +
+        "race,American Indian,1\n" +
+        "race,Unknown,1\n" +
+        "county,Ward,2\n" +
+        "county,Burleigh,1\n" +
+        "county,Cass,1\n" +
+        "county,Stark,1\n" +
+        "county,Stutsman,1\n" +
+        "sex,Female,5\n" +
+        "sex,Male,1\n"
+    },
     '2026-09-08': {
       shortLabel: 'Sep 8',
       metaLabel: 'Week of Sep 8, 2026',

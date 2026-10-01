@@ -351,9 +351,72 @@
   };
   var AGE_CAVEAT = 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.';
 
-  var WEEK_ORDER = ['2026-09-15', '2026-09-08'];
+  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08'];
 
   var WEEKS = {
+    '2026-09-23': {
+      shortLabel: 'Sep 23',
+      metaLabel: 'Week of Sep 23, 2026',
+      total: 14,
+      countiesRepresented: 8,
+      topArea: { label: 'tied, 6 counties', count: 2 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 13 },
+          { label: '30–39', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 9 },
+          { label: 'Black', count: 5 }
+        ],
+        county: [
+          { label: 'Black Hawk', count: 2 },
+          { label: 'Linn', count: 2 },
+          { label: 'Polk', count: 2 },
+          { label: 'Pottawattamie', count: 2 },
+          { label: 'Scott', count: 2 },
+          { label: 'Woodbury', count: 2 },
+          { label: 'Lee', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 8 },
+          { label: 'Male', count: 6 }
+        ]
+      },
+      rawFilename: 'missing_persons_ia_week_of_2026-09-23.csv',
+      countsFilename: 'missing_persons_ia_week_of_2026-09-23_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Black,Black Hawk,Female\n" +
+        "10-19,Black,Black Hawk,Male\n" +
+        "10-19,Black,Linn,Female\n" +
+        "10-19,Black,Scott,Male\n" +
+        "10-19,White,Lee,Male\n" +
+        "10-19,White,Linn,Female\n" +
+        "10-19,White,Polk,Female\n" +
+        "10-19,White,Pottawattamie,Male\n" +
+        "10-19,White,Pottawattamie,Male\n" +
+        "10-19,White,Scott,Male\n" +
+        "10-19,White,Unknown,Female\n" +
+        "10-19,White,Woodbury,Female\n" +
+        "10-19,White,Woodbury,Female\n" +
+        "30-39,Black,Polk,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,13\n" +
+        "age_range,30-39,1\n" +
+        "race,White,9\n" +
+        "race,Black,5\n" +
+        "county,Black Hawk,2\n" +
+        "county,Linn,2\n" +
+        "county,Polk,2\n" +
+        "county,Pottawattamie,2\n" +
+        "county,Scott,2\n" +
+        "county,Woodbury,2\n" +
+        "county,Lee,1\n" +
+        "county,Unknown,1\n" +
+        "sex,Female,8\n" +
+        "sex,Male,6\n"
+    },
     '2026-09-08': {
       shortLabel: 'Sep 8',
       metaLabel: 'Week of Sep 8, 2026',

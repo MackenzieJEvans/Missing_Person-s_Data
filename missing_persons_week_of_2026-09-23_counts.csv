@@ -1,0 +1,17 @@
+field,value,count
+age_range,10-19,26
+age_range,40-49,1
+race,White,14
+race,Black,10
+race,American Indian Or Alaskan Native,1
+race,Asian Or Pacific Islander,1
+race,Unknown,1
+county,Douglas County,15
+county,Lancaster County,4
+county,Sarpy County,3
+county,Cheyenne County,2
+county,Buffalo County,1
+county,Dodge County,1
+county,Hall County,1
+sex,M,20
+sex,F,7
