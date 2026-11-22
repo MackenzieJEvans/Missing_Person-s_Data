@@ -114,6 +114,7 @@
   }
   .meta .sep { color: var(--line-strong); }
   .meta .dim { color: var(--muted); }
+  .agg-note { margin: 14px 0 0; font-size: 12px; line-height: 1.55; color: var(--muted); max-width: 78ch; }
 
   .downloads-bar {
     display: flex;
@@ -296,6 +297,8 @@
     <span class="dim">missingpersons.sd.gov</span>
   </div>
 
+  <p class="agg-note" id="agg-note" hidden></p>
+
   <div class="downloads-bar" id="download-bar" hidden>
     <span class="downloads-label">Download data</span>
     <button class="dl-btn" id="dl-raw" type="button">
@@ -310,7 +313,7 @@
 
   <div class="kpis">
     <div class="kpi">
-      <p class="kpi-label">Open cases</p>
+      <p class="kpi-label" id="kpi-open-label">Open cases</p>
       <div class="kpi-value mono" id="kpi-open">7</div>
     </div>
     <div class="kpi">
@@ -342,9 +345,94 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-04'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-04', 'september-2026'];
 
   var WEEKS = {
+    'september-2026': {
+      shortLabel: 'September',
+      metaLabel: 'September 2026',
+      metaCases: '26 cases · sum of 4 weekly snapshots',
+      openLabel: 'Cases (4 snapshots summed)',
+      aggregate: true,
+      aggNote: 'Sum of four separate weekly snapshots (Sep 4, 8, 15 and 23), not unique people. The Sep 4 and Sep 8 windows overlap (Sep 8–11), so anyone listed in both is counted twice; people found between snapshots drop out.',
+      total: 26,
+      countiesRepresented: 9,
+      topArea: { label: 'Pennington', count: 8 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 23 },
+          { label: '20–29', count: 3 }
+        ],
+        race: [
+          { label: 'American Indian/Alaskan Native', count: 11 },
+          { label: 'White', count: 8 },
+          { label: 'Unknown', count: 4 },
+          { label: 'Black', count: 3 }
+        ],
+        county: [
+          { label: 'Pennington', count: 8 },
+          { label: 'Minnehaha', count: 7 },
+          { label: 'Meade', count: 4 },
+          { label: 'Bon Homme', count: 2 },
+          { label: 'Brown', count: 1 },
+          { label: 'Cheyenne River Sioux Tribal PD', count: 1 },
+          { label: 'Codington', count: 1 },
+          { label: 'Crow Creek Tribal Police Dept', count: 1 },
+          { label: 'Grant', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 16 },
+          { label: 'Female', count: 10 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_september_2026.csv',
+      countsFilename: 'missing_persons_sd_september_2026_counts.csv',
+      rawCsv: "age_range,race,county,sex,week_of\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Female,2026-09-04\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male,2026-09-04\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male,2026-09-04\n" +
+        "10-19,Unknown,Bon Homme,Male,2026-09-04\n" +
+        "10-19,White,Minnehaha,Female,2026-09-04\n" +
+        "20-29,American Indian/Alaskan Native,Cheyenne River Sioux Tribal PD,Female,2026-09-04\n" +
+        "20-29,American Indian/Alaskan Native,Pennington,Male,2026-09-04\n" +
+        "10-19,American Indian/Alaskan Native,Brown,Female,2026-09-08\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male,2026-09-08\n" +
+        "10-19,Black,Minnehaha,Female,2026-09-08\n" +
+        "10-19,Black,Minnehaha,Female,2026-09-08\n" +
+        "10-19,Unknown,Bon Homme,Male,2026-09-08\n" +
+        "10-19,White,Codington,Male,2026-09-08\n" +
+        "10-19,White,Meade,Male,2026-09-08\n" +
+        "10-19,White,Minnehaha,Female,2026-09-08\n" +
+        "10-19,White,Minnehaha,Male,2026-09-08\n" +
+        "10-19,American Indian/Alaskan Native,Minnehaha,Male,2026-09-15\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male,2026-09-15\n" +
+        "10-19,Black,Minnehaha,Male,2026-09-15\n" +
+        "10-19,Unknown,Grant,Male,2026-09-15\n" +
+        "10-19,White,Meade,Female,2026-09-15\n" +
+        "10-19,White,Meade,Female,2026-09-15\n" +
+        "20-29,American Indian/Alaskan Native,Pennington,Male,2026-09-15\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Male,2026-09-23\n" +
+        "10-19,Unknown,Crow Creek Tribal Police Dept,Male,2026-09-23\n" +
+        "10-19,White,Meade,Female,2026-09-23\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,23\n" +
+        "age_range,20-29,3\n" +
+        "race,American Indian/Alaskan Native,11\n" +
+        "race,White,8\n" +
+        "race,Unknown,4\n" +
+        "race,Black,3\n" +
+        "county,Pennington,8\n" +
+        "county,Minnehaha,7\n" +
+        "county,Meade,4\n" +
+        "county,Bon Homme,2\n" +
+        "county,Brown,1\n" +
+        "county,Cheyenne River Sioux Tribal PD,1\n" +
+        "county,Codington,1\n" +
+        "county,Crow Creek Tribal Police Dept,1\n" +
+        "county,Grant,1\n" +
+        "sex,Male,16\n" +
+        "sex,Female,10\n"
+    },
     '2026-11-15': {
       shortLabel: 'Nov 15',
       metaLabel: 'Week of Nov 15, 2026',
@@ -877,15 +965,23 @@
     });
 
     document.getElementById('meta-week').textContent = w.metaLabel;
-    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
+    document.getElementById('meta-cases').textContent = w.metaCases || (w.total + ' open case' + (w.total === 1 ? '' : 's'));
+    document.getElementById('kpi-open-label').textContent = w.openLabel || 'Open cases';
+    var aggNote = document.getElementById('agg-note');
+    aggNote.textContent = w.aggNote || '';
+    aggNote.hidden = !w.aggNote;
     document.getElementById('kpi-open').textContent = w.total;
     document.getElementById('kpi-counties').textContent = w.countiesRepresented;
     document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
 
     buildCharts(w.data, w.total);
 
-    var idx = WEEK_ORDER.indexOf(weekId);
-    var prevWeekId = WEEK_ORDER[idx + 1];
+    var prevWeekId = null;
+    if (!w.aggregate) {
+      for (var j = WEEK_ORDER.indexOf(weekId) + 1; j < WEEK_ORDER.length; j++) {
+        if (!WEEKS[WEEK_ORDER[j]].aggregate) { prevWeekId = WEEK_ORDER[j]; break; }
+      }
+    }
     var currXtabMap = xtabCompute(w.rawCsv);
     var prevXtabMap = prevWeekId ? xtabCompute(WEEKS[prevWeekId].rawCsv) : null;
     renderCrosstab(currXtabMap, w.total, w.shortLabel, prevXtabMap, prevWeekId ? WEEKS[prevWeekId].shortLabel : null);

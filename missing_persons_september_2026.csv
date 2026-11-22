@@ -1,0 +1,117 @@
+age_range,race,county,sex,week_of
+10-19,American Indian Or Alaskan Native,Douglas County,F,2026-09-03
+10-19,Black,Buffalo County,M,2026-09-03
+10-19,Black,Douglas County,F,2026-09-03
+10-19,Black,Douglas County,F,2026-09-03
+10-19,Black,Douglas County,F,2026-09-03
+10-19,Black,Douglas County,M,2026-09-03
+10-19,Black,Douglas County,M,2026-09-03
+10-19,Black,Douglas County,M,2026-09-03
+10-19,Black,Douglas County,M,2026-09-03
+10-19,Black,Sarpy County,M,2026-09-03
+10-19,White,Colfax County,F,2026-09-03
+10-19,White,Douglas County,F,2026-09-03
+10-19,White,Douglas County,F,2026-09-03
+10-19,White,Douglas County,M,2026-09-03
+10-19,White,Douglas County,M,2026-09-03
+10-19,White,Douglas County,M,2026-09-03
+10-19,White,Douglas County,M,2026-09-03
+10-19,White,Douglas County,M,2026-09-03
+10-19,White,Lancaster County,M,2026-09-03
+10-19,White,Sarpy County,M,2026-09-03
+10-19,White,Sherman County,F,2026-09-03
+40-49,Unknown,Douglas County,F,2026-09-03
+40-49,White,Lancaster County,F,2026-09-03
+40-49,White,Sarpy County,F,2026-09-03
+60-69,American Indian Or Alaskan Native,Douglas County,M,2026-09-03
+10-19,American Indian Or Alaskan Native,Douglas County,F,2026-09-08
+10-19,American Indian Or Alaskan Native,Douglas County,M,2026-09-08
+10-19,Asian Or Pacific Islander,Douglas County,M,2026-09-08
+10-19,Black,Douglas County,F,2026-09-08
+10-19,Black,Douglas County,F,2026-09-08
+10-19,Black,Douglas County,M,2026-09-08
+10-19,Black,Douglas County,M,2026-09-08
+10-19,Black,Douglas County,M,2026-09-08
+10-19,Black,Douglas County,M,2026-09-08
+10-19,Black,Lancaster County,F,2026-09-08
+10-19,Black,Sarpy County,F,2026-09-08
+10-19,Unknown,Adams County,F,2026-09-08
+10-19,White,Dawson County,M,2026-09-08
+10-19,White,Douglas County,F,2026-09-08
+10-19,White,Douglas County,F,2026-09-08
+10-19,White,Douglas County,F,2026-09-08
+10-19,White,Douglas County,M,2026-09-08
+10-19,White,Douglas County,M,2026-09-08
+10-19,White,Douglas County,M,2026-09-08
+10-19,White,Douglas County,M,2026-09-08
+10-19,White,Douglas County,M,2026-09-08
+10-19,White,Hall County,F,2026-09-08
+10-19,White,Lancaster County,F,2026-09-08
+10-19,White,Lancaster County,M,2026-09-08
+10-19,White,Madison County,F,2026-09-08
+20-29,White,Custer County,F,2026-09-08
+30-39,American Indian Or Alaskan Native,Douglas County,F,2026-09-08
+30-39,Black,Douglas County,M,2026-09-08
+30-39,White,Lancaster County,F,2026-09-08
+40-49,White,Douglas County,F,2026-09-08
+50-59,White,Douglas County,M,2026-09-08
+60-69,American Indian Or Alaskan Native,Douglas County,M,2026-09-08
+70-79,White,Douglas County,F,2026-09-08
+10-19,American Indian Or Alaskan Native,Sarpy County,M,2026-09-15
+10-19,Asian Or Pacific Islander,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,F,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Douglas County,M,2026-09-15
+10-19,Black,Hall County,F,2026-09-15
+10-19,Unknown,Douglas County,F,2026-09-15
+10-19,White,Adams County,F,2026-09-15
+10-19,White,Buffalo County,M,2026-09-15
+10-19,White,Dodge County,F,2026-09-15
+10-19,White,Douglas County,F,2026-09-15
+10-19,White,Douglas County,F,2026-09-15
+10-19,White,Douglas County,M,2026-09-15
+10-19,White,Lancaster County,F,2026-09-15
+10-19,White,Sarpy County,M,2026-09-15
+30-39,White,Douglas County,F,2026-09-15
+40-49,White,Douglas County,F,2026-09-15
+40-49,White,Douglas County,F,2026-09-15
+10-19,American Indian Or Alaskan Native,Douglas County,M,2026-09-23
+10-19,Asian Or Pacific Islander,Douglas County,M,2026-09-23
+10-19,Black,Douglas County,F,2026-09-23
+10-19,Black,Douglas County,F,2026-09-23
+10-19,Black,Douglas County,F,2026-09-23
+10-19,Black,Douglas County,M,2026-09-23
+10-19,Black,Douglas County,M,2026-09-23
+10-19,Black,Douglas County,M,2026-09-23
+10-19,Black,Douglas County,M,2026-09-23
+10-19,Black,Douglas County,M,2026-09-23
+10-19,Black,Lancaster County,M,2026-09-23
+10-19,Black,Sarpy County,M,2026-09-23
+10-19,Unknown,Hall County,F,2026-09-23
+10-19,White,Buffalo County,M,2026-09-23
+10-19,White,Cheyenne County,M,2026-09-23
+10-19,White,Cheyenne County,M,2026-09-23
+10-19,White,Douglas County,F,2026-09-23
+10-19,White,Douglas County,F,2026-09-23
+10-19,White,Douglas County,M,2026-09-23
+10-19,White,Douglas County,M,2026-09-23
+10-19,White,Douglas County,M,2026-09-23
+10-19,White,Lancaster County,M,2026-09-23
+10-19,White,Lancaster County,M,2026-09-23
+10-19,White,Lancaster County,M,2026-09-23
+10-19,White,Sarpy County,F,2026-09-23
+10-19,White,Sarpy County,M,2026-09-23
+40-49,White,Dodge County,M,2026-09-23

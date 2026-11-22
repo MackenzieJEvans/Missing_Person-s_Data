@@ -114,6 +114,7 @@
   }
   .meta .sep { color: var(--line-strong); }
   .meta .dim { color: var(--muted); }
+  .agg-note { margin: 14px 0 0; font-size: 12px; line-height: 1.55; color: var(--muted); max-width: 78ch; }
 
   .downloads-bar {
     display: flex;
@@ -296,6 +297,8 @@
     <span class="dim">statepatrol.nebraska.gov</span>
   </div>
 
+  <p class="agg-note" id="agg-note" hidden></p>
+
   <div class="downloads-bar" id="download-bar" hidden>
     <span class="downloads-label">Download data</span>
     <button class="dl-btn" id="dl-raw" type="button">
@@ -310,7 +313,7 @@
 
   <div class="kpis">
     <div class="kpi">
-      <p class="kpi-label">Open cases</p>
+      <p class="kpi-label" id="kpi-open-label">Open cases</p>
       <div class="kpi-value mono" id="kpi-open">25</div>
     </div>
     <div class="kpi">
@@ -342,9 +345,204 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-03'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-03', 'september-2026'];
 
   var WEEKS = {
+    'september-2026': {
+      shortLabel: 'September',
+      metaLabel: 'September 2026',
+      metaCases: '116 cases · sum of 4 weekly snapshots',
+      openLabel: 'Cases (4 snapshots summed)',
+      aggregate: true,
+      aggNote: 'Sum of four separate weekly snapshots (Sep 3, 8, 15 and 23), not unique people. The Sep 3 and Sep 8 windows overlap (Sep 8–10), so anyone listed in both is counted twice; people found between snapshots drop out.',
+      total: 116,
+      countiesRepresented: 13,
+      topArea: { label: 'Douglas Co.', count: 79 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 100 },
+          { label: '20–29', count: 1 },
+          { label: '30–39', count: 4 },
+          { label: '40–49', count: 7 },
+          { label: '50–59', count: 1 },
+          { label: '60–69', count: 2 },
+          { label: '70–79', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 56 },
+          { label: 'Black', count: 45 },
+          { label: 'Am. Indian / Alaskan Native', count: 8 },
+          { label: 'Unknown', count: 4 },
+          { label: 'Asian / Pacific Islander', count: 3 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 79 },
+          { label: 'Lancaster County', count: 11 },
+          { label: 'Sarpy County', count: 9 },
+          { label: 'Buffalo County', count: 3 },
+          { label: 'Hall County', count: 3 },
+          { label: 'Adams County', count: 2 },
+          { label: 'Cheyenne County', count: 2 },
+          { label: 'Dodge County', count: 2 },
+          { label: 'Colfax County', count: 1 },
+          { label: 'Custer County', count: 1 },
+          { label: 'Dawson County', count: 1 },
+          { label: 'Madison County', count: 1 },
+          { label: 'Sherman County', count: 1 }
+        ],
+        sex: [
+          { label: 'Male', count: 60 },
+          { label: 'Female', count: 56 }
+        ]
+      },
+      rawFilename: 'missing_persons_september_2026.csv',
+      countsFilename: 'missing_persons_september_2026_counts.csv',
+      rawCsv: "age_range,race,county,sex,week_of\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,F,2026-09-03\n" +
+        "10-19,Black,Buffalo County,M,2026-09-03\n" +
+        "10-19,Black,Douglas County,F,2026-09-03\n" +
+        "10-19,Black,Douglas County,F,2026-09-03\n" +
+        "10-19,Black,Douglas County,F,2026-09-03\n" +
+        "10-19,Black,Douglas County,M,2026-09-03\n" +
+        "10-19,Black,Douglas County,M,2026-09-03\n" +
+        "10-19,Black,Douglas County,M,2026-09-03\n" +
+        "10-19,Black,Douglas County,M,2026-09-03\n" +
+        "10-19,Black,Sarpy County,M,2026-09-03\n" +
+        "10-19,White,Colfax County,F,2026-09-03\n" +
+        "10-19,White,Douglas County,F,2026-09-03\n" +
+        "10-19,White,Douglas County,F,2026-09-03\n" +
+        "10-19,White,Douglas County,M,2026-09-03\n" +
+        "10-19,White,Douglas County,M,2026-09-03\n" +
+        "10-19,White,Douglas County,M,2026-09-03\n" +
+        "10-19,White,Douglas County,M,2026-09-03\n" +
+        "10-19,White,Douglas County,M,2026-09-03\n" +
+        "10-19,White,Lancaster County,M,2026-09-03\n" +
+        "10-19,White,Sarpy County,M,2026-09-03\n" +
+        "10-19,White,Sherman County,F,2026-09-03\n" +
+        "40-49,Unknown,Douglas County,F,2026-09-03\n" +
+        "40-49,White,Lancaster County,F,2026-09-03\n" +
+        "40-49,White,Sarpy County,F,2026-09-03\n" +
+        "60-69,American Indian Or Alaskan Native,Douglas County,M,2026-09-03\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,F,2026-09-08\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,M,2026-09-08\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,M,2026-09-08\n" +
+        "10-19,Black,Douglas County,F,2026-09-08\n" +
+        "10-19,Black,Douglas County,F,2026-09-08\n" +
+        "10-19,Black,Douglas County,M,2026-09-08\n" +
+        "10-19,Black,Douglas County,M,2026-09-08\n" +
+        "10-19,Black,Douglas County,M,2026-09-08\n" +
+        "10-19,Black,Douglas County,M,2026-09-08\n" +
+        "10-19,Black,Lancaster County,F,2026-09-08\n" +
+        "10-19,Black,Sarpy County,F,2026-09-08\n" +
+        "10-19,Unknown,Adams County,F,2026-09-08\n" +
+        "10-19,White,Dawson County,M,2026-09-08\n" +
+        "10-19,White,Douglas County,F,2026-09-08\n" +
+        "10-19,White,Douglas County,F,2026-09-08\n" +
+        "10-19,White,Douglas County,F,2026-09-08\n" +
+        "10-19,White,Douglas County,M,2026-09-08\n" +
+        "10-19,White,Douglas County,M,2026-09-08\n" +
+        "10-19,White,Douglas County,M,2026-09-08\n" +
+        "10-19,White,Douglas County,M,2026-09-08\n" +
+        "10-19,White,Douglas County,M,2026-09-08\n" +
+        "10-19,White,Hall County,F,2026-09-08\n" +
+        "10-19,White,Lancaster County,F,2026-09-08\n" +
+        "10-19,White,Lancaster County,M,2026-09-08\n" +
+        "10-19,White,Madison County,F,2026-09-08\n" +
+        "20-29,White,Custer County,F,2026-09-08\n" +
+        "30-39,American Indian Or Alaskan Native,Douglas County,F,2026-09-08\n" +
+        "30-39,Black,Douglas County,M,2026-09-08\n" +
+        "30-39,White,Lancaster County,F,2026-09-08\n" +
+        "40-49,White,Douglas County,F,2026-09-08\n" +
+        "50-59,White,Douglas County,M,2026-09-08\n" +
+        "60-69,American Indian Or Alaskan Native,Douglas County,M,2026-09-08\n" +
+        "70-79,White,Douglas County,F,2026-09-08\n" +
+        "10-19,American Indian Or Alaskan Native,Sarpy County,M,2026-09-15\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,F,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Douglas County,M,2026-09-15\n" +
+        "10-19,Black,Hall County,F,2026-09-15\n" +
+        "10-19,Unknown,Douglas County,F,2026-09-15\n" +
+        "10-19,White,Adams County,F,2026-09-15\n" +
+        "10-19,White,Buffalo County,M,2026-09-15\n" +
+        "10-19,White,Dodge County,F,2026-09-15\n" +
+        "10-19,White,Douglas County,F,2026-09-15\n" +
+        "10-19,White,Douglas County,F,2026-09-15\n" +
+        "10-19,White,Douglas County,M,2026-09-15\n" +
+        "10-19,White,Lancaster County,F,2026-09-15\n" +
+        "10-19,White,Sarpy County,M,2026-09-15\n" +
+        "30-39,White,Douglas County,F,2026-09-15\n" +
+        "40-49,White,Douglas County,F,2026-09-15\n" +
+        "40-49,White,Douglas County,F,2026-09-15\n" +
+        "10-19,American Indian Or Alaskan Native,Douglas County,M,2026-09-23\n" +
+        "10-19,Asian Or Pacific Islander,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Douglas County,F,2026-09-23\n" +
+        "10-19,Black,Douglas County,F,2026-09-23\n" +
+        "10-19,Black,Douglas County,F,2026-09-23\n" +
+        "10-19,Black,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Douglas County,M,2026-09-23\n" +
+        "10-19,Black,Lancaster County,M,2026-09-23\n" +
+        "10-19,Black,Sarpy County,M,2026-09-23\n" +
+        "10-19,Unknown,Hall County,F,2026-09-23\n" +
+        "10-19,White,Buffalo County,M,2026-09-23\n" +
+        "10-19,White,Cheyenne County,M,2026-09-23\n" +
+        "10-19,White,Cheyenne County,M,2026-09-23\n" +
+        "10-19,White,Douglas County,F,2026-09-23\n" +
+        "10-19,White,Douglas County,F,2026-09-23\n" +
+        "10-19,White,Douglas County,M,2026-09-23\n" +
+        "10-19,White,Douglas County,M,2026-09-23\n" +
+        "10-19,White,Douglas County,M,2026-09-23\n" +
+        "10-19,White,Lancaster County,M,2026-09-23\n" +
+        "10-19,White,Lancaster County,M,2026-09-23\n" +
+        "10-19,White,Lancaster County,M,2026-09-23\n" +
+        "10-19,White,Sarpy County,F,2026-09-23\n" +
+        "10-19,White,Sarpy County,M,2026-09-23\n" +
+        "40-49,White,Dodge County,M,2026-09-23\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,100\n" +
+        "age_range,40-49,7\n" +
+        "age_range,30-39,4\n" +
+        "age_range,60-69,2\n" +
+        "age_range,20-29,1\n" +
+        "age_range,50-59,1\n" +
+        "age_range,70-79,1\n" +
+        "race,White,56\n" +
+        "race,Black,45\n" +
+        "race,American Indian Or Alaskan Native,8\n" +
+        "race,Unknown,4\n" +
+        "race,Asian Or Pacific Islander,3\n" +
+        "county,Douglas County,79\n" +
+        "county,Lancaster County,11\n" +
+        "county,Sarpy County,9\n" +
+        "county,Buffalo County,3\n" +
+        "county,Hall County,3\n" +
+        "county,Adams County,2\n" +
+        "county,Cheyenne County,2\n" +
+        "county,Dodge County,2\n" +
+        "county,Colfax County,1\n" +
+        "county,Custer County,1\n" +
+        "county,Dawson County,1\n" +
+        "county,Madison County,1\n" +
+        "county,Sherman County,1\n" +
+        "sex,M,60\n" +
+        "sex,F,56\n"
+    },
     '2026-11-15': {
       shortLabel: 'Nov 15',
       metaLabel: 'Week of Nov 15, 2026',
@@ -1037,15 +1235,23 @@
     });
 
     document.getElementById('meta-week').textContent = w.metaLabel;
-    document.getElementById('meta-cases').textContent = w.total + ' open case' + (w.total === 1 ? '' : 's');
+    document.getElementById('meta-cases').textContent = w.metaCases || (w.total + ' open case' + (w.total === 1 ? '' : 's'));
+    document.getElementById('kpi-open-label').textContent = w.openLabel || 'Open cases';
+    var aggNote = document.getElementById('agg-note');
+    aggNote.textContent = w.aggNote || '';
+    aggNote.hidden = !w.aggNote;
     document.getElementById('kpi-open').textContent = w.total;
     document.getElementById('kpi-counties').textContent = w.countiesRepresented;
     document.getElementById('kpi-top').innerHTML = w.topArea.count + '<span class="unit">&middot; ' + w.topArea.label + '</span>';
 
     buildCharts(w.data, w.total);
 
-    var idx = WEEK_ORDER.indexOf(weekId);
-    var prevWeekId = WEEK_ORDER[idx + 1];
+    var prevWeekId = null;
+    if (!w.aggregate) {
+      for (var j = WEEK_ORDER.indexOf(weekId) + 1; j < WEEK_ORDER.length; j++) {
+        if (!WEEKS[WEEK_ORDER[j]].aggregate) { prevWeekId = WEEK_ORDER[j]; break; }
+      }
+    }
     var currXtabMap = xtabCompute(w.rawCsv);
     var prevXtabMap = prevWeekId ? xtabCompute(WEEKS[prevWeekId].rawCsv) : null;
     renderCrosstab(currXtabMap, w.total, w.shortLabel, prevXtabMap, prevWeekId ? WEEKS[prevWeekId].shortLabel : null);

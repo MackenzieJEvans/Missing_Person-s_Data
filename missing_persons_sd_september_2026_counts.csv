@@ -1,0 +1,18 @@
+field,value,count
+age_range,10-19,23
+age_range,20-29,3
+race,American Indian/Alaskan Native,11
+race,White,8
+race,Unknown,4
+race,Black,3
+county,Pennington,8
+county,Minnehaha,7
+county,Meade,4
+county,Bon Homme,2
+county,Brown,1
+county,Cheyenne River Sioux Tribal PD,1
+county,Codington,1
+county,Crow Creek Tribal Police Dept,1
+county,Grant,1
+sex,Male,16
+sex,Female,10

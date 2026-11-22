@@ -1,0 +1,28 @@
+field,value,count
+age_range,10-19,100
+age_range,40-49,7
+age_range,30-39,4
+age_range,60-69,2
+age_range,20-29,1
+age_range,50-59,1
+age_range,70-79,1
+race,White,56
+race,Black,45
+race,American Indian Or Alaskan Native,8
+race,Unknown,4
+race,Asian Or Pacific Islander,3
+county,Douglas County,79
+county,Lancaster County,11
+county,Sarpy County,9
+county,Buffalo County,3
+county,Hall County,3
+county,Adams County,2
+county,Cheyenne County,2
+county,Dodge County,2
+county,Colfax County,1
+county,Custer County,1
+county,Dawson County,1
+county,Madison County,1
+county,Sherman County,1
+sex,M,60
+sex,F,56
