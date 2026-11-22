@@ -1,0 +1,12 @@
+field,value,count
+age_range,10-19,5
+age_range,30-39,1
+race,White,4
+race,Black,1
+race,Unknown,1
+county,Polk,2
+county,Webster,2
+county,Jasper,1
+county,Johnson,1
+sex,Female,3
+sex,Male,3

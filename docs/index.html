@@ -348,9 +348,104 @@
 <script>
   var AGE_CAVEAT = 'Combines Nebraska’s and South Dakota’s age when reported missing with Iowa’s and North Dakota’s current age — nearly the same measure for a single week, but not identical.';
 
-  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08'];
 
   var WEEKS = {
+    '2026-11-15': {
+      shortLabel: 'Nov 15',
+      metaLabel: 'Week of Nov 15, 2026',
+      weekPhrase: 'for the week of Nov 15, 2026',
+      total: 41,
+      statesRepresented: 4,
+      topState: { label: 'Nebraska', count: 23 },
+      rawByState: {
+        NE: "age_range,race,county,sex\n" +
+          "10-19,Asian Or Pacific Islander,Lancaster County,F\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,F\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Douglas County,M\n" +
+          "10-19,Black,Lancaster County,F\n" +
+          "10-19,Black,Lancaster County,F\n" +
+          "10-19,Black,Lancaster County,F\n" +
+          "10-19,Black,Sarpy County,F\n" +
+          "10-19,Black,Sarpy County,M\n" +
+          "10-19,Unknown,Lancaster County,F\n" +
+          "10-19,White,Box Butte County,F\n" +
+          "10-19,White,Douglas County,F\n" +
+          "10-19,White,Douglas County,F\n" +
+          "10-19,White,Douglas County,F\n" +
+          "10-19,White,Douglas County,M\n" +
+          "10-19,White,Douglas County,M\n" +
+          "10-19,White,Lancaster County,F\n" +
+          "10-19,White,Lancaster County,M\n" +
+          "10-19,White,Scotts Bluff County,M\n" +
+          "30-39,Black,Douglas County,M\n",
+        SD: "age_range,race,county,sex\n" +
+          "10-19,American Indian/Alaskan Native,Davison,Male\n" +
+          "10-19,American Indian/Alaskan Native,Pennington,Female\n" +
+          "10-19,Black,Minnehaha,Female\n" +
+          "10-19,White,Lincoln,Female\n" +
+          "10-19,White,Pennington,Male\n" +
+          "20-29,American Indian/Alaskan Native,Minnehaha,Female\n" +
+          "20-29,White,Minnehaha,Female\n",
+        IA: "age_range,race,county,sex\n" +
+          "10-19,Black,Johnson,Female\n" +
+          "10-19,Unknown,Webster,Female\n" +
+          "10-19,White,Jasper,Male\n" +
+          "10-19,White,Polk,Male\n" +
+          "10-19,White,Webster,Female\n" +
+          "30-39,White,Polk,Male\n",
+        ND: "age_range,race,county,sex\n" +
+          "10-19,American Indian,Burleigh,Female\n" +
+          "10-19,Black,Cass,Female\n" +
+          "10-19,White,Burleigh,Male\n" +
+          "10-19,White,Golden Valley,Male\n" +
+          "50-59,White,Burleigh,Female\n"
+      },
+      stateData: [
+        { label: 'Nebraska', count: 23 },
+        { label: 'South Dakota', count: 7 },
+        { label: 'Iowa', count: 6 },
+        { label: 'North Dakota', count: 5 }
+      ],
+      raceData: [
+        { label: 'White', count: 19 },
+        { label: 'Black', count: 15 },
+        { label: 'American Indian / Alaskan Native', count: 4 },
+        { label: 'Unknown', count: 2 },
+        { label: 'Asian / Pacific Islander', count: 1 }
+      ],
+      sexData: [
+        { label: 'Female', count: 25 },
+        { label: 'Male', count: 16 }
+      ],
+      ageData: [
+        { label: '10–19', count: 36 },
+        { label: '20–29', count: 2 },
+        { label: '30–39', count: 2 },
+        { label: '50–59', count: 1 }
+      ],
+      countsFilename: 'missing_persons_combined_week_of_2026-11-15_counts.csv',
+      countsCsv: "state,field,value,count\n" +
+        "NE,total,open_cases,23\n" +
+        "SD,total,open_cases,7\n" +
+        "IA,total,open_cases,6\n" +
+        "ND,total,open_cases,5\n" +
+        "ALL,race,White,19\n" +
+        "ALL,race,Black,15\n" +
+        "ALL,race,American Indian / Alaskan Native,4\n" +
+        "ALL,race,Unknown,2\n" +
+        "ALL,race,Asian / Pacific Islander,1\n" +
+        "ALL,sex,Female,25\n" +
+        "ALL,sex,Male,16\n" +
+        "ALL,age_range,10-19,36\n" +
+        "ALL,age_range,20-29,2\n" +
+        "ALL,age_range,30-39,2\n" +
+        "ALL,age_range,50-59,1\n"
+    },
     '2026-09-23': {
       shortLabel: 'Sep 23',
       metaLabel: 'Week of Sep 23, 2026',

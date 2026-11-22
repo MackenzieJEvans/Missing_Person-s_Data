@@ -342,9 +342,59 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08', '2026-09-04'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-04'];
 
   var WEEKS = {
+    '2026-11-15': {
+      shortLabel: 'Nov 15',
+      metaLabel: 'Week of Nov 15, 2026',
+      total: 7,
+      countiesRepresented: 4,
+      topArea: { label: 'Minnehaha', count: 3 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 5 },
+          { label: '20–29', count: 2 }
+        ],
+        race: [
+          { label: 'American Indian/Alaskan Native', count: 3 },
+          { label: 'White', count: 3 },
+          { label: 'Black', count: 1 }
+        ],
+        county: [
+          { label: 'Minnehaha', count: 3 },
+          { label: 'Pennington', count: 2 },
+          { label: 'Davison', count: 1 },
+          { label: 'Lincoln', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 5 },
+          { label: 'Male', count: 2 }
+        ]
+      },
+      rawFilename: 'missing_persons_sd_week_of_2026-11-15.csv',
+      countsFilename: 'missing_persons_sd_week_of_2026-11-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,American Indian/Alaskan Native,Davison,Male\n" +
+        "10-19,American Indian/Alaskan Native,Pennington,Female\n" +
+        "10-19,Black,Minnehaha,Female\n" +
+        "10-19,White,Lincoln,Female\n" +
+        "10-19,White,Pennington,Male\n" +
+        "20-29,American Indian/Alaskan Native,Minnehaha,Female\n" +
+        "20-29,White,Minnehaha,Female\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,5\n" +
+        "age_range,20-29,2\n" +
+        "race,American Indian/Alaskan Native,3\n" +
+        "race,White,3\n" +
+        "race,Black,1\n" +
+        "county,Minnehaha,3\n" +
+        "county,Pennington,2\n" +
+        "county,Davison,1\n" +
+        "county,Lincoln,1\n" +
+        "sex,Female,5\n" +
+        "sex,Male,2\n"
+    },
     '2026-09-23': {
       shortLabel: 'Sep 23',
       metaLabel: 'Week of Sep 23, 2026',

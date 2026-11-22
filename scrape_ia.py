@@ -11,11 +11,10 @@ not age at the time reported missing.
 How this differs from Nebraska/South Dakota:
 - Like Nebraska, race requires a per-record detail-page fetch; age, sex,
   agency and last-contact-date are on the list page.
-- Unlike either: the site paginates (~50/page, 250+ total active cases), and
-  the list can be sorted newest-first via query params - but ONLY against
-  the site root ("/"); passing the same query string to the canonical path
-  ("/divisions/.../missing-persons") triggers a meta-refresh redirect that
-  drops the query entirely. Hitting "/" is not a workaround, it's required.
+- Unlike either: the site paginates (~21/page, 250+ total active cases), and
+  the list can be sorted newest-first via query params. The listing lives at
+  /missing-persons/current-missing-persons (it used to be the site root; the
+  site was reorganized in late 2026 and the card markup changed with it).
 - County derivation is a hybrid of Nebraska's and South Dakota's approaches:
   county sheriff / county dispatch agencies name their county directly in
   the agency string (mechanical, no external data, like Nebraska) - but
@@ -52,7 +51,7 @@ import requests
 # Query-string sorting/pagination only works against the site root - see the
 # module docstring. Do not "simplify" this to the canonical /divisions/... path.
 BASE = "https://missingpersons.iowa.gov"
-LIST_URL = f"{BASE}/"
+LIST_URL = f"{BASE}/missing-persons/current-missing-persons"
 USER_AGENT = (
     "IA-missing-persons-demographics/1.0 "
     "(aggregate public-safety statistics; no personal data retained)"
@@ -168,10 +167,12 @@ def age_range(raw: str) -> str:
 
 def parse_last_contact_date(raw: str) -> dt.date | None:
     raw = norm(raw)
-    try:
-        return dt.datetime.strptime(raw, "%m/%d/%Y").date()
-    except ValueError:
-        return None
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y"):
+        try:
+            return dt.datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    return None
 
 
 def build_session() -> requests.Session:
@@ -201,13 +202,13 @@ def derive_county(agency: str) -> str:
     return CITY_COUNTY.get(city.upper(), UNKNOWN_COUNTY)
 
 
-CARD_RE = re.compile(r'<li class="col-12 col-md-6 col-xl-4">.*?</li>', re.S)
+CARD_RE = re.compile(r'<article[^>]*missing-person--teaser.*?</article>', re.S)
 FIELD_PATTERNS = {
-    "href": re.compile(r'<a href="([^"]+)"\s+class="card-img-top'),
-    "age_now": re.compile(r'<span class="age-now">([^<]*)</span>'),
-    "last_contact_date": re.compile(r"Last Contact Date:</strong>\s*([0-9/]+)"),
-    "agency": re.compile(r"<strong>Agency:</strong>\s*([^\n<]*)"),
-    "gender": re.compile(r"<strong>Gender:\s*</strong>\s*([^\n<]*)"),
+    "href": re.compile(r'<a class="section-heading" href="([^"]+)"'),
+    "age_now": re.compile(r"<strong>Age Now:</strong>\s*<p>([^<]*)</p>"),
+    "last_contact_date": re.compile(r'Last Contact Date:</strong>\s*<p><time datetime="(\d{4}-\d{2}-\d{2})'),
+    "agency": re.compile(r"<strong>Agency:</strong>\s*<p>([^<]*)</p>"),
+    "gender": re.compile(r"<strong>Gender:\s*</strong>\s*<p>([^<]*)</p>"),
 }
 PAGE_COUNT_RE = re.compile(r'title="Go to last page"[^>]*>.*?<span[^>]*>(\d+)', re.S)
 
@@ -233,13 +234,8 @@ def fetch_detail(session: requests.Session, href: str) -> dict:
     resp = session.get(BASE + href, timeout=REQUEST_TIMEOUT)
     resp.raise_for_status()
     text = resp.text
-    race_m = re.search(r"Race:\s*</th>\s*<td[^>]*>\s*([^<]*)", text)
-    if race_m is None:
-        # fall back to the plain-text label ordering seen on the rendered page
-        race_m = re.search(r"Race:\s*\n?\s*([A-Za-z /]+)", text)
-    sex_m = re.search(r"Sex:\s*</th>\s*<td[^>]*>\s*([^<]*)", text)
-    if sex_m is None:
-        sex_m = re.search(r"Sex:\s*\n?\s*([A-Za-z]+)", text)
+    race_m = re.search(r"<strong>Race:</strong>\s*<p>\s*([^<]*)", text)
+    sex_m = re.search(r"<strong>Gender:</strong>\s*<p>\s*(?:<div[^>]*>)?\s*([^<]*)", text)
     return {
         "race": norm(race_m.group(1)) if race_m else "Unknown",
         "sex": norm(sex_m.group(1)) if sex_m else "Unknown",
@@ -354,6 +350,9 @@ def write_counts_csv(records: list[dict], columns: list[str], cutoff: dt.date) -
 
 
 def scrape_from(rows: list[dict], session: requests.Session, cutoff: dt.date) -> list[dict]:
+    if not rows:
+        sys.exit("no list rows parsed from the Iowa site - its layout has likely "
+                 "changed; refusing to write an empty week")
     in_window, skipped = [], 0
     for r in rows:
         d = parse_last_contact_date(r["last_contact_date"])

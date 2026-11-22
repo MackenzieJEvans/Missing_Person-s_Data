@@ -1,0 +1,11 @@
+field,value,count
+age_range,10-19,4
+age_range,50-59,1
+race,White,3
+race,American Indian,1
+race,Black,1
+county,Burleigh,3
+county,Cass,1
+county,Golden Valley,1
+sex,Female,3
+sex,Male,2

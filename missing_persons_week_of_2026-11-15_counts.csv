@@ -1,0 +1,14 @@
+field,value,count
+age_range,10-19,22
+age_range,30-39,1
+race,Black,12
+race,White,9
+race,Asian Or Pacific Islander,1
+race,Unknown,1
+county,Douglas County,12
+county,Lancaster County,7
+county,Sarpy County,2
+county,Box Butte County,1
+county,Scotts Bluff County,1
+sex,F,14
+sex,M,9

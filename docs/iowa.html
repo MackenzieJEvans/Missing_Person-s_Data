@@ -357,9 +357,58 @@
   };
   var AGE_CAVEAT = 'Bucketed from age today, not age when reported missing — Nebraska and South Dakota use the latter, so treat cross-state age comparisons with caution.';
 
-  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08'];
 
   var WEEKS = {
+    '2026-11-15': {
+      shortLabel: 'Nov 15',
+      metaLabel: 'Week of Nov 15, 2026',
+      total: 6,
+      countiesRepresented: 4,
+      topArea: { label: 'tied, 2 counties', count: 2 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 5 },
+          { label: '30–39', count: 1 }
+        ],
+        race: [
+          { label: 'White', count: 4 },
+          { label: 'Black', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Polk', count: 2 },
+          { label: 'Webster', count: 2 },
+          { label: 'Jasper', count: 1 },
+          { label: 'Johnson', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 3 },
+          { label: 'Male', count: 3 }
+        ]
+      },
+      rawFilename: 'missing_persons_ia_week_of_2026-11-15.csv',
+      countsFilename: 'missing_persons_ia_week_of_2026-11-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Black,Johnson,Female\n" +
+        "10-19,Unknown,Webster,Female\n" +
+        "10-19,White,Jasper,Male\n" +
+        "10-19,White,Polk,Male\n" +
+        "10-19,White,Webster,Female\n" +
+        "30-39,White,Polk,Male\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,5\n" +
+        "age_range,30-39,1\n" +
+        "race,White,4\n" +
+        "race,Black,1\n" +
+        "race,Unknown,1\n" +
+        "county,Polk,2\n" +
+        "county,Webster,2\n" +
+        "county,Jasper,1\n" +
+        "county,Johnson,1\n" +
+        "sex,Female,3\n" +
+        "sex,Male,3\n"
+    },
     '2026-09-23': {
       shortLabel: 'Sep 23',
       metaLabel: 'Week of Sep 23, 2026',

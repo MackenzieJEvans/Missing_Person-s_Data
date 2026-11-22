@@ -1,0 +1,12 @@
+field,value,count
+age_range,10-19,5
+age_range,20-29,2
+race,American Indian/Alaskan Native,3
+race,White,3
+race,Black,1
+county,Minnehaha,3
+county,Pennington,2
+county,Davison,1
+county,Lincoln,1
+sex,Female,5
+sex,Male,2

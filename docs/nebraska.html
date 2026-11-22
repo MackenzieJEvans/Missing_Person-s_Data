@@ -348,9 +348,79 @@
     sex: 'Cases by sex'
   };
 
-  var WEEK_ORDER = ['2026-09-23', '2026-09-15', '2026-09-08', '2026-09-03'];
+  var WEEK_ORDER = ['2026-11-15', '2026-09-23', '2026-09-15', '2026-09-08', '2026-09-03'];
 
   var WEEKS = {
+    '2026-11-15': {
+      shortLabel: 'Nov 15',
+      metaLabel: 'Week of Nov 15, 2026',
+      total: 23,
+      countiesRepresented: 5,
+      topArea: { label: 'Douglas Co.', count: 12 },
+      data: {
+        age_range: [
+          { label: '10–19', count: 22 },
+          { label: '30–39', count: 1 }
+        ],
+        race: [
+          { label: 'Black', count: 12 },
+          { label: 'White', count: 9 },
+          { label: 'Asian / Pacific Islander', count: 1 },
+          { label: 'Unknown', count: 1 }
+        ],
+        county: [
+          { label: 'Douglas County', count: 12 },
+          { label: 'Lancaster County', count: 7 },
+          { label: 'Sarpy County', count: 2 },
+          { label: 'Box Butte County', count: 1 },
+          { label: 'Scotts Bluff County', count: 1 }
+        ],
+        sex: [
+          { label: 'Female', count: 14 },
+          { label: 'Male', count: 9 }
+        ]
+      },
+      rawFilename: 'missing_persons_week_of_2026-11-15.csv',
+      countsFilename: 'missing_persons_week_of_2026-11-15_counts.csv',
+      rawCsv: "age_range,race,county,sex\n" +
+        "10-19,Asian Or Pacific Islander,Lancaster County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,F\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Douglas County,M\n" +
+        "10-19,Black,Lancaster County,F\n" +
+        "10-19,Black,Lancaster County,F\n" +
+        "10-19,Black,Lancaster County,F\n" +
+        "10-19,Black,Sarpy County,F\n" +
+        "10-19,Black,Sarpy County,M\n" +
+        "10-19,Unknown,Lancaster County,F\n" +
+        "10-19,White,Box Butte County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,F\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Douglas County,M\n" +
+        "10-19,White,Lancaster County,F\n" +
+        "10-19,White,Lancaster County,M\n" +
+        "10-19,White,Scotts Bluff County,M\n" +
+        "30-39,Black,Douglas County,M\n",
+      countsCsv: "field,value,count\n" +
+        "age_range,10-19,22\n" +
+        "age_range,30-39,1\n" +
+        "race,Black,12\n" +
+        "race,White,9\n" +
+        "race,Asian Or Pacific Islander,1\n" +
+        "race,Unknown,1\n" +
+        "county,Douglas County,12\n" +
+        "county,Lancaster County,7\n" +
+        "county,Sarpy County,2\n" +
+        "county,Box Butte County,1\n" +
+        "county,Scotts Bluff County,1\n" +
+        "sex,F,14\n" +
+        "sex,M,9\n"
+    },
     '2026-09-23': {
       shortLabel: 'Sep 23',
       metaLabel: 'Week of Sep 23, 2026',
